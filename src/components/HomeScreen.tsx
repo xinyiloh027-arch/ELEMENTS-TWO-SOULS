@@ -53,20 +53,36 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
       {/* Main Container */}
       <div className="relative z-10 max-w-2xl w-full flex flex-col items-center text-center space-y-7">
-        {/* Title Section */}
-        <div className="space-y-3">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 border border-sky-200 shadow-xs text-xs sm:text-sm font-semibold text-slate-600 tracking-wide">
+        {/* Title & Lore Header Section */}
+        <div className="space-y-3.5 max-w-2xl px-2 animate-fade-in">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/90 border border-sky-200 shadow-xs text-xs sm:text-sm font-semibold text-slate-600 tracking-wide backdrop-blur-md">
             <Sparkles className="w-4 h-4 text-amber-500 animate-pulse" />
             <span>2D 双人平台横版冒险 · 在线联机已上线</span>
           </div>
 
-          <h1 className="text-5xl sm:text-6xl font-black tracking-tight drop-shadow-xs">
-            <span className="text-sky-500">Twin</span>{' '}
-            <span className="text-orange-500">Quest</span>
-          </h1>
+          {/* 1. Game Title (Primary Hierarchy) */}
+          <div className="space-y-1">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight drop-shadow-xs">
+              <span className="text-sky-500 bg-gradient-to-r from-sky-600 to-sky-500 bg-clip-text text-transparent">
+                ELEMENTS:
+              </span>{' '}
+              <span className="text-orange-500 bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">
+                TWO SOULS
+              </span>
+            </h1>
+            <p className="text-xs sm:text-sm font-bold tracking-widest text-slate-500 uppercase">
+              Twin Quest · 双人合作大冒险
+            </p>
+          </div>
 
-          <p className="text-xl sm:text-2xl font-bold text-slate-700 tracking-wide">
-            双人合作大冒险
+          {/* 2. English Caption / Tagline (Secondary Hierarchy) */}
+          <p className="text-lg sm:text-xl md:text-2xl font-extrabold text-slate-800 tracking-tight leading-snug">
+            “Two elements. Two souls. One journey.”
+          </p>
+
+          {/* 3. Description (Tertiary Hierarchy) */}
+          <p className="max-w-xl mx-auto text-sm sm:text-base font-medium text-slate-600 leading-relaxed">
+            Fire and water may be opposites, but together, they can overcome anything. Work as a team, solve challenging puzzles, and find your way through a world full of danger and discovery.
           </p>
         </div>
 
@@ -154,22 +170,32 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           <button
             id="btn-online-coop"
             onClick={onOpenOnlineLobby}
-            className="group relative inline-flex items-center justify-center gap-3 w-full sm:w-auto min-w-[240px] h-16 px-8 rounded-3xl font-black text-xl text-white shadow-xl shadow-indigo-500/25 bg-gradient-to-r from-indigo-600 via-sky-600 to-teal-500 hover:from-indigo-500 hover:to-teal-400 hover:shadow-2xl hover:shadow-indigo-500/30 transition-all duration-200 active:scale-95 cursor-pointer border-2 border-white/40"
+            className="group relative inline-flex items-center justify-center gap-3 w-full sm:w-auto min-w-[240px] h-16 sm:h-18 px-7 py-2 rounded-3xl text-white shadow-xl shadow-indigo-500/25 bg-gradient-to-r from-indigo-600 via-sky-600 to-teal-500 hover:from-indigo-500 hover:to-teal-400 hover:shadow-2xl hover:shadow-indigo-500/30 transition-all duration-200 active:scale-95 cursor-pointer border-2 border-white/40"
           >
-            <Users className="w-6 h-6 fill-white/20" />
-            <span className="tracking-wide">双人在线联机</span>
-            <span className="text-xs bg-white/25 px-2 py-0.5 rounded-full font-bold">联机</span>
+            <Users className="w-6 h-6 shrink-0 fill-white/20" />
+            <div className="flex flex-col items-center justify-center leading-tight">
+              <span className="font-black text-lg sm:text-xl tracking-wide">双人在线联机</span>
+              <span className="text-[11px] sm:text-xs font-extrabold tracking-wider text-sky-100 uppercase opacity-95">
+                ONLINE CO-OP
+              </span>
+            </div>
+            <span className="text-[11px] bg-white/25 px-2 py-0.5 rounded-full font-bold ml-0.5">联机</span>
           </button>
 
           {/* Local 2-Player Co-op Button */}
           <button
             id="btn-start-game"
             onClick={onStartLocalGame}
-            className="group relative inline-flex items-center justify-center gap-3 w-full sm:w-auto min-w-[220px] h-16 px-8 rounded-3xl font-black text-xl text-white shadow-xl shadow-orange-500/25 bg-gradient-to-r from-sky-500 via-amber-500 to-orange-500 hover:from-sky-400 hover:to-orange-400 hover:shadow-2xl hover:shadow-orange-500/30 transition-all duration-200 active:scale-95 cursor-pointer border-2 border-white/40"
+            className="group relative inline-flex items-center justify-center gap-3 w-full sm:w-auto min-w-[220px] h-16 sm:h-18 px-7 py-2 rounded-3xl text-white shadow-xl shadow-orange-500/25 bg-gradient-to-r from-sky-500 via-amber-500 to-orange-500 hover:from-sky-400 hover:to-orange-400 hover:shadow-2xl hover:shadow-orange-500/30 transition-all duration-200 active:scale-95 cursor-pointer border-2 border-white/40"
           >
-            <Play className="w-6 h-6 fill-white" />
-            <span className="tracking-wide">开始第 1 关</span>
-            <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+            <Play className="w-6 h-6 shrink-0 fill-white" />
+            <div className="flex flex-col items-center justify-center leading-tight">
+              <span className="font-black text-lg sm:text-xl tracking-wide">开始第一关</span>
+              <span className="text-[11px] sm:text-xs font-extrabold tracking-wider text-amber-100 uppercase opacity-95">
+                START LEVEL 1
+              </span>
+            </div>
+            <ArrowRight className="w-5 h-5 shrink-0 transition-transform group-hover:translate-x-1" />
           </button>
         </div>
 
