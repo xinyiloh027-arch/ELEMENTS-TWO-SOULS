@@ -11,11 +11,17 @@ async function startServer() {
   const httpServer = http.createServer(app);
 
   // Enable CORS for all HTTP requests to support remote frontend health checks
-  app.use((_req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
+  app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    if (origin) {
+      res.header('Access-Control-Allow-Origin', origin);
+      res.header('Access-Control-Allow-Credentials', 'true');
+    } else {
+      res.header('Access-Control-Allow-Origin', '*');
+    }
     res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-    if (_req.method === 'OPTIONS') {
+    if (req.method === 'OPTIONS') {
       return res.sendStatus(200);
     }
     next();
@@ -23,7 +29,10 @@ async function startServer() {
 
   const io = new SocketIOServer(httpServer, {
     cors: {
-      origin: '*',
+      origin: (_origin, callback) => {
+        // Explicitly accept all origins including GitHub Pages to prevent credentials CORS rejects
+        callback(null, true);
+      },
       methods: ['GET', 'POST'],
       credentials: true,
     },

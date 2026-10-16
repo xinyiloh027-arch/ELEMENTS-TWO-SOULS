@@ -51,7 +51,7 @@ jobs:
         run: npm run build
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
-          VITE_SOCKET_URL: ${{ vars.VITE_SOCKET_URL || secrets.VITE_SOCKET_URL || '' }}
+          VITE_SOCKET_URL: ${{ vars.VITE_SOCKET_URL || secrets.VITE_SOCKET_URL || 'https://elements-two-souls.onrender.com' }}
 
       - name: Ensure SPA fallback (404.html)
         run: cp dist/index.html dist/404.html

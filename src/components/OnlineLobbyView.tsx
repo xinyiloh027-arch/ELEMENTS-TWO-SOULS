@@ -254,7 +254,7 @@ export const OnlineLobbyView: React.FC<OnlineLobbyViewProps> = ({
                 type="url"
                 value={serverUrlInput}
                 onChange={(e) => setServerUrlInput(e.target.value)}
-                placeholder="https://your-service.onrender.com"
+                placeholder="https://elements-two-souls.onrender.com"
                 className="flex-1 px-3.5 py-2 rounded-xl border-2 border-slate-200 focus:border-sky-500 outline-none text-xs font-mono font-medium text-slate-800 bg-slate-50 placeholder:text-slate-400 transition-all"
               />
               <button

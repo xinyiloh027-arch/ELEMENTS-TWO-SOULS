@@ -48,12 +48,14 @@ export function normalizeServerUrl(rawUrl: string): string {
   return url.replace(/\/+$/, '');
 }
 
+export const PRODUCTION_SOCKET_URL = 'https://elements-two-souls.onrender.com';
+
 /**
  * Resolves the default socket server URL:
- * 1. User manual override stored in localStorage
+ * 1. User manual override stored in localStorage (validated)
  * 2. Vite environment variable VITE_SOCKET_URL (injected during build)
- * 3. Localhost fallback when running locally
- * 4. Empty string if on GitHub Pages with no backend URL configured yet
+ * 3. Localhost fallback when running locally in development mode
+ * 4. Production Render server fallback (https://elements-two-souls.onrender.com)
  */
 export function getDefaultServerUrl(): string {
   if (typeof window !== 'undefined') {
@@ -62,7 +64,14 @@ export function getDefaultServerUrl(): string {
         localStorage.getItem('duality_socket_url') ||
         localStorage.getItem('twinquest_socket_url');
       if (stored && stored.trim()) {
-        return normalizeServerUrl(stored);
+        const normalized = normalizeServerUrl(stored);
+        const isRemoteHost =
+          window.location.hostname !== 'localhost' &&
+          window.location.hostname !== '127.0.0.1';
+        // Ignore stored localhost entries if running on a remote domain like GitHub Pages
+        if (!(isRemoteHost && (normalized.includes('localhost') || normalized.includes('127.0.0.1')))) {
+          return normalized;
+        }
       }
     } catch {
       // Ignore localStorage access issues
@@ -74,19 +83,20 @@ export function getDefaultServerUrl(): string {
     return normalizeServerUrl(envUrl);
   }
 
-  // Local development fallback
+  // Local development fallback only when on localhost/127.0.0.1 in dev mode
   if (typeof window !== 'undefined') {
     const isLocalhost =
       window.location.hostname === 'localhost' ||
       window.location.hostname === '127.0.0.1';
-    if (isLocalhost) {
+    if (isLocalhost && (import.meta as any).env?.DEV) {
       return window.location.port === '3000'
         ? window.location.origin
         : 'http://localhost:3000';
     }
   }
 
-  return '';
+  // Default production fallback to your Render server
+  return PRODUCTION_SOCKET_URL;
 }
 
 class SocketService {
