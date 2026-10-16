@@ -56,15 +56,25 @@ class SocketService {
 
     this.setStatus('connecting');
 
-    // Connect to same origin / port 3000
-    this.socket = io({
-      autoConnect: true,
-      reconnection: true,
-      reconnectionAttempts: 25,
-      reconnectionDelay: 800,
-      reconnectionDelayMax: 3000,
-      timeout: 10000,
-    });
+    // Connect to optional remote backend or same origin
+    const socketUrl = (import.meta as any).env?.VITE_SOCKET_URL || undefined;
+    this.socket = socketUrl
+      ? io(socketUrl, {
+          autoConnect: true,
+          reconnection: true,
+          reconnectionAttempts: 15,
+          reconnectionDelay: 1000,
+          reconnectionDelayMax: 4000,
+          timeout: 6000,
+        })
+      : io({
+          autoConnect: true,
+          reconnection: true,
+          reconnectionAttempts: 15,
+          reconnectionDelay: 1000,
+          reconnectionDelayMax: 4000,
+          timeout: 6000,
+        });
 
     this.socket.on('connect', () => {
       this.setStatus('connected');
@@ -272,7 +282,16 @@ class SocketService {
       if (!this.socket) {
         return resolve({ success: false, error: 'Socket 初始化失败' });
       }
+      const timer = setTimeout(() => {
+        resolve({
+          success: false,
+          error:
+            '联机服务器暂未响应。GitHub Pages 静态托管提供完整的 20 关单人/本地双人合作体验；在线联机需运行后端 WebSocket 实例。',
+        });
+      }, 4000);
+
       this.socket.emit('create_room', { playerName }, (res: any) => {
+        clearTimeout(timer);
         resolve(res);
       });
     });
@@ -290,7 +309,16 @@ class SocketService {
       if (!this.socket) {
         return resolve({ success: false, error: 'Socket 初始化失败' });
       }
+      const timer = setTimeout(() => {
+        resolve({
+          success: false,
+          error:
+            '联机服务器暂未响应。GitHub Pages 静态托管提供完整的 20 关单人/本地双人合作体验；在线联机需运行后端 WebSocket 实例。',
+        });
+      }, 4000);
+
       this.socket.emit('join_room', { roomCode, playerName }, (res: any) => {
+        clearTimeout(timer);
         resolve(res);
       });
     });
