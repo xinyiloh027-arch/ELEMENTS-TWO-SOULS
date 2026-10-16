@@ -1,0 +1,199 @@
+import React, { useEffect, useState } from 'react';
+import { Play, Sparkles, Gamepad2, ArrowRight, Users, Grid, Volume2, VolumeX } from 'lucide-react';
+import { soundManager, SoundSettings } from '../services/soundManager';
+
+interface HomeScreenProps {
+  onStartLocalGame: () => void;
+  onOpenOnlineLobby: () => void;
+  onOpenLevelSelect?: () => void;
+  unlockedLevel?: number;
+}
+
+export const HomeScreen: React.FC<HomeScreenProps> = ({
+  onStartLocalGame,
+  onOpenOnlineLobby,
+  onOpenLevelSelect,
+  unlockedLevel = 1,
+}) => {
+  const [soundSettings, setSoundSettings] = useState<SoundSettings>(() => soundManager.getSettings());
+
+  useEffect(() => {
+    return soundManager.subscribe((settings) => {
+      setSoundSettings(settings);
+    });
+  }, []);
+
+  return (
+    <div className="relative min-h-screen w-full flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-b from-sky-100 via-sky-50 to-amber-50 text-slate-800 overflow-hidden select-none">
+      {/* Sound quick toggle button in top-right */}
+      <div className="absolute top-4 right-4 z-20">
+        <button
+          id="btn-home-sound-toggle"
+          onClick={() => {
+            soundManager.toggleMute();
+            if (soundSettings.muted) {
+              soundManager.playJump('xinyi');
+            }
+          }}
+          title={soundSettings.muted ? '取消静音 (Unmute)' : '静音 (Mute)'}
+          className={`flex items-center gap-1.5 px-3 py-2 rounded-2xl border text-xs font-bold shadow-xs transition-all active:scale-95 cursor-pointer backdrop-blur-md ${
+            soundSettings.muted
+              ? 'bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100'
+              : 'bg-white/90 text-emerald-700 border-emerald-200 hover:bg-white'
+          }`}
+        >
+          {soundSettings.muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+          <span>{soundSettings.muted ? '已静音' : '音乐与音效开'}</span>
+        </button>
+      </div>
+
+      {/* Background soft ambient glowing circles */}
+      <div className="absolute top-12 left-1/4 w-72 h-72 rounded-full bg-sky-200/40 blur-3xl pointer-events-none" />
+      <div className="absolute bottom-12 right-1/4 w-80 h-80 rounded-full bg-orange-200/40 blur-3xl pointer-events-none" />
+
+      {/* Main Container */}
+      <div className="relative z-10 max-w-2xl w-full flex flex-col items-center text-center space-y-7">
+        {/* Title Section */}
+        <div className="space-y-3">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 border border-sky-200 shadow-xs text-xs sm:text-sm font-semibold text-slate-600 tracking-wide">
+            <Sparkles className="w-4 h-4 text-amber-500 animate-pulse" />
+            <span>2D 双人平台横版冒险 · 在线联机已上线</span>
+          </div>
+
+          <h1 className="text-5xl sm:text-6xl font-black tracking-tight drop-shadow-xs">
+            <span className="text-sky-500">Twin</span>{' '}
+            <span className="text-orange-500">Quest</span>
+          </h1>
+
+          <p className="text-xl sm:text-2xl font-bold text-slate-700 tracking-wide">
+            双人合作大冒险
+          </p>
+        </div>
+
+        {/* Character Preview Showcase */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+          {/* Xinyi Card */}
+          <div className="flex flex-col items-center p-5 rounded-2xl bg-white/90 border-2 border-sky-200 shadow-sm transition-all hover:shadow-md hover:border-sky-400">
+            {/* Cute Xinyi Avatar */}
+            <div className="relative w-20 h-20 mb-3 flex items-center justify-center">
+              <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-sky-500 to-sky-400 shadow-md flex items-center justify-center border-2 border-sky-600">
+                {/* Eyes and blush */}
+                <div className="flex items-center gap-3">
+                  <div className="w-2.5 h-2.5 rounded-full bg-slate-900 ring-2 ring-white/50" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-slate-900 ring-2 ring-white/50" />
+                </div>
+              </div>
+              <div className="absolute -top-1 px-2 py-0.5 rounded-full bg-sky-100 border border-sky-300 text-[11px] font-bold text-sky-700">
+                玩家 1
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5 text-lg font-black text-sky-600 mb-1">
+              <span>🔵 Xinyi</span>
+            </div>
+            <p className="text-xs text-slate-500 mb-3 font-medium">水蓝色的敏捷伙伴</p>
+
+            {/* Keys */}
+            <div className="flex items-center gap-2 pt-2 border-t border-sky-100 w-full justify-center">
+              <span className="text-xs font-semibold text-slate-500">操作:</span>
+              <div className="flex gap-1.5 text-xs font-mono font-bold text-sky-700">
+                <kbd className="px-2 py-1 bg-sky-50 border border-sky-200 rounded-md shadow-2xs">A</kbd>
+                <kbd className="px-2 py-1 bg-sky-50 border border-sky-200 rounded-md shadow-2xs">D</kbd>
+                <kbd className="px-2 py-1 bg-sky-50 border border-sky-200 rounded-md shadow-2xs">W 跳跃</kbd>
+              </div>
+            </div>
+          </div>
+
+          {/* James Card */}
+          <div className="flex flex-col items-center p-5 rounded-2xl bg-white/90 border-2 border-orange-200 shadow-sm transition-all hover:shadow-md hover:border-orange-400">
+            {/* Cute James Avatar */}
+            <div className="relative w-20 h-20 mb-3 flex items-center justify-center">
+              <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-orange-500 to-amber-400 shadow-md flex items-center justify-center border-2 border-orange-600">
+                {/* Eyes and blush */}
+                <div className="flex items-center gap-3">
+                  <div className="w-2.5 h-2.5 rounded-full bg-slate-900 ring-2 ring-white/50" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-slate-900 ring-2 ring-white/50" />
+                </div>
+              </div>
+              <div className="absolute -top-1 px-2 py-0.5 rounded-full bg-orange-100 border border-orange-300 text-[11px] font-bold text-orange-700">
+                玩家 2
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5 text-lg font-black text-orange-600 mb-1">
+              <span>🟠 James</span>
+            </div>
+            <p className="text-xs text-slate-500 mb-3 font-medium">暖橙色的热情伙伴</p>
+
+            {/* Keys */}
+            <div className="flex items-center gap-2 pt-2 border-t border-orange-100 w-full justify-center">
+              <span className="text-xs font-semibold text-slate-500">操作:</span>
+              <div className="flex gap-1.5 text-xs font-mono font-bold text-orange-700">
+                <kbd className="px-2 py-1 bg-orange-50 border border-orange-200 rounded-md shadow-2xs">←</kbd>
+                <kbd className="px-2 py-1 bg-orange-50 border border-orange-200 rounded-md shadow-2xs">→</kbd>
+                <kbd className="px-2 py-1 bg-orange-50 border border-orange-200 rounded-md shadow-2xs">↑ 跳跃</kbd>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Mission Goal Box */}
+        <div className="px-5 py-3 rounded-2xl bg-white/80 border border-slate-200/90 text-xs sm:text-sm text-slate-700 flex flex-col sm:flex-row items-center justify-center gap-2 shadow-sm">
+          <div className="flex items-center gap-1.5 font-bold text-slate-800">
+            <Gamepad2 className="w-5 h-5 text-emerald-500 shrink-0" />
+            <span>双人合作机制：</span>
+          </div>
+          <span className="text-slate-600">
+            各自踩下对应颜色机关开启大门，必须两人同时到达 <strong className="text-emerald-600 font-extrabold">EXIT</strong> 终点方可通关！
+          </span>
+        </div>
+
+        {/* Action Buttons: Online Co-op + Local Co-op (Both Large min 56px with clear feedback) */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full pt-1">
+          {/* Online Multiplayer Button (Highlighted Feature) */}
+          <button
+            id="btn-online-coop"
+            onClick={onOpenOnlineLobby}
+            className="group relative inline-flex items-center justify-center gap-3 w-full sm:w-auto min-w-[240px] h-16 px-8 rounded-3xl font-black text-xl text-white shadow-xl shadow-indigo-500/25 bg-gradient-to-r from-indigo-600 via-sky-600 to-teal-500 hover:from-indigo-500 hover:to-teal-400 hover:shadow-2xl hover:shadow-indigo-500/30 transition-all duration-200 active:scale-95 cursor-pointer border-2 border-white/40"
+          >
+            <Users className="w-6 h-6 fill-white/20" />
+            <span className="tracking-wide">双人在线联机</span>
+            <span className="text-xs bg-white/25 px-2 py-0.5 rounded-full font-bold">联机</span>
+          </button>
+
+          {/* Local 2-Player Co-op Button */}
+          <button
+            id="btn-start-game"
+            onClick={onStartLocalGame}
+            className="group relative inline-flex items-center justify-center gap-3 w-full sm:w-auto min-w-[220px] h-16 px-8 rounded-3xl font-black text-xl text-white shadow-xl shadow-orange-500/25 bg-gradient-to-r from-sky-500 via-amber-500 to-orange-500 hover:from-sky-400 hover:to-orange-400 hover:shadow-2xl hover:shadow-orange-500/30 transition-all duration-200 active:scale-95 cursor-pointer border-2 border-white/40"
+          >
+            <Play className="w-6 h-6 fill-white" />
+            <span className="tracking-wide">开始第 1 关</span>
+            <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+          </button>
+        </div>
+
+        {/* Level Select Option */}
+        {onOpenLevelSelect && (
+          <button
+            id="btn-level-select"
+            onClick={onOpenLevelSelect}
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-white/90 hover:bg-white text-slate-700 hover:text-slate-900 border border-slate-300/80 shadow-xs hover:shadow-sm font-bold text-sm tracking-wide transition-all active:scale-95 cursor-pointer"
+          >
+            <Grid className="w-4 h-4 text-sky-500" />
+            <span>关卡选择 LEVEL SELECT (01 ~ 20)</span>
+            <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-bold">
+              进度: {unlockedLevel}/20
+            </span>
+          </button>
+        )}
+
+        {/* Subtle footer tip */}
+        <p className="text-xs text-slate-400 font-medium">
+          在线联机支持跨设备远程互联 · 本地模式支持单键盘或双虚拟手柄同屏
+        </p>
+      </div>
+    </div>
+  );
+};
+

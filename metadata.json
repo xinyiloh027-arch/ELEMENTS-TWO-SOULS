@@ -1,0 +1,6 @@
+{
+  "name": "Twin Quest",
+  "description": "Twin Quest (双人合作大冒险) - A charming 2D cooperative platformer featuring Xinyi and James.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
