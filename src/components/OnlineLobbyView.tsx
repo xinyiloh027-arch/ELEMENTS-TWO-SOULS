@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Users,
   PlusCircle,
@@ -10,6 +10,8 @@ import {
   Loader2,
   ShieldCheck,
   RotateCcw,
+  Server,
+  ExternalLink,
 } from 'lucide-react';
 import { socketService } from '../services/socketService';
 import { ConnectionStatus, PlayerId, RoomState } from '../types';
@@ -36,7 +38,22 @@ export const OnlineLobbyView: React.FC<OnlineLobbyViewProps> = ({
     socketService.getStatus()
   );
 
-  // Initialize Socket connection and listeners
+  // Server URL configuration for Render deployment
+  const [serverUrlInput, setServerUrlInput] = useState<string>(() => socketService.getServerUrl());
+  const [showServerConfig, setShowServerConfig] = useState<boolean>(
+    () => !socketService.getServerUrl() || socketService.getStatus() === 'unconfigured'
+  );
+  const [urlSavedFeedback, setUrlSavedFeedback] = useState(false);
+
+  // Stable references for socket event callbacks to avoid tearing down listeners
+  const currentRoomRef = useRef<RoomState | null>(null);
+  currentRoomRef.current = currentRoom;
+  const myRoleRef = useRef<PlayerId>(myRole);
+  myRoleRef.current = myRole;
+  const onStartGameRef = useRef(onStartGame);
+  onStartGameRef.current = onStartGame;
+
+  // Initialize Socket connection and listeners ONCE on mount
   useEffect(() => {
     socketService.connect();
 
@@ -46,8 +63,10 @@ export const OnlineLobbyView: React.FC<OnlineLobbyViewProps> = ({
 
     const unsubRoom = socketService.subscribeRoom((room) => {
       setCurrentRoom(room);
-      const hasP1 = !!(room.players.xinyi || room.players.lumi);
-      const hasP2 = !!(room.players.james || room.players.flare);
+      const p1 = room.players.xinyi || room.players.lumi;
+      const p2 = room.players.james || room.players.flare;
+      const hasP1 = !!(p1 && p1.isConnected);
+      const hasP2 = !!(p2 && p2.isConnected);
       if (hasP1 && hasP2) {
         setSubView('lobby');
       } else if (hasP1 && !hasP2) {
@@ -64,8 +83,8 @@ export const OnlineLobbyView: React.FC<OnlineLobbyViewProps> = ({
     });
 
     const unsubGameStart = socketService.subscribeGameStart(() => {
-      if (currentRoom) {
-        onStartGame(myRole, currentRoom.roomCode);
+      if (currentRoomRef.current) {
+        onStartGameRef.current?.(myRoleRef.current, currentRoomRef.current.roomCode);
       }
     });
 
@@ -75,7 +94,15 @@ export const OnlineLobbyView: React.FC<OnlineLobbyViewProps> = ({
       unsubCountdown();
       unsubGameStart();
     };
-  }, [currentRoom, myRole, onStartGame]);
+  }, []);
+
+  const handleSaveServerUrl = () => {
+    const trimmed = serverUrlInput.trim();
+    socketService.setServerUrl(trimmed);
+    setUrlSavedFeedback(true);
+    setErrorMessage('');
+    setTimeout(() => setUrlSavedFeedback(false), 2000);
+  };
 
   // Handle Create Room
   const handleCreateRoom = async () => {
@@ -148,22 +175,38 @@ export const OnlineLobbyView: React.FC<OnlineLobbyViewProps> = ({
       <div className="absolute top-10 left-1/3 w-80 h-80 rounded-full bg-sky-200/40 blur-3xl pointer-events-none" />
       <div className="absolute bottom-10 right-1/3 w-80 h-80 rounded-full bg-orange-200/40 blur-3xl pointer-events-none" />
 
-      {/* Network status pill in top-right */}
-      <div className="absolute top-4 right-4 z-20">
+      {/* Network status & Server Config in top-right */}
+      <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+        <button
+          id="btn-server-config"
+          onClick={() => setShowServerConfig((prev) => !prev)}
+          title="配置联机服务器 URL"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-white/90 hover:bg-white text-slate-700 border border-slate-300 shadow-xs transition-all cursor-pointer backdrop-blur-md active:scale-95"
+        >
+          <Server className="w-3.5 h-3.5 text-sky-600" />
+          <span>服务器设置</span>
+        </button>
+
         <div
-          className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold backdrop-blur-md shadow-xs border ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold backdrop-blur-md shadow-xs border ${
             connectionStatus === 'connected'
               ? 'bg-emerald-100/90 border-emerald-300 text-emerald-700'
               : connectionStatus === 'connecting'
               ? 'bg-sky-100/90 border-sky-300 text-sky-700'
-              : 'bg-amber-100/90 border-amber-300 text-amber-700'
+              : connectionStatus === 'unconfigured'
+              ? 'bg-amber-100/90 border-amber-400 text-amber-800'
+              : 'bg-rose-100/90 border-rose-300 text-rose-700'
           }`}
         >
           <span
             className={`w-2 h-2 rounded-full ${
               connectionStatus === 'connected'
                 ? 'bg-emerald-500 animate-pulse'
-                : 'bg-amber-500 animate-ping'
+                : connectionStatus === 'connecting'
+                ? 'bg-sky-500 animate-ping'
+                : connectionStatus === 'unconfigured'
+                ? 'bg-amber-500'
+                : 'bg-rose-500 animate-ping'
             }`}
           />
           <span>
@@ -171,6 +214,8 @@ export const OnlineLobbyView: React.FC<OnlineLobbyViewProps> = ({
               ? '服务器已连接'
               : connectionStatus === 'connecting'
               ? '连接服务器中...'
+              : connectionStatus === 'unconfigured'
+              ? '未配置服务器'
               : '正在重连...'}
           </span>
         </div>
@@ -178,6 +223,63 @@ export const OnlineLobbyView: React.FC<OnlineLobbyViewProps> = ({
 
       {/* Main Card Container */}
       <div className="relative z-10 max-w-xl w-full flex flex-col items-center">
+        {/* Server Config Box */}
+        {showServerConfig && (
+          <div className="w-full mb-4 p-5 rounded-3xl bg-white/95 border-2 border-sky-300 shadow-xl space-y-3 text-left animate-fade-in backdrop-blur-md">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center font-bold">
+                  <Server className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-black text-slate-800">
+                    Render 联机服务器地址 (Server URL)
+                  </h4>
+                  <p className="text-xs text-slate-500">
+                    两台设备需连接同一个后端实例方可跨设备联机
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowServerConfig(false)}
+                className="text-slate-400 hover:text-slate-600 text-sm font-bold cursor-pointer px-2 py-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-stretch gap-2 pt-1">
+              <input
+                id="input-server-url"
+                type="url"
+                value={serverUrlInput}
+                onChange={(e) => setServerUrlInput(e.target.value)}
+                placeholder="https://your-service.onrender.com"
+                className="flex-1 px-3.5 py-2 rounded-xl border-2 border-slate-200 focus:border-sky-500 outline-none text-xs font-mono font-medium text-slate-800 bg-slate-50 placeholder:text-slate-400 transition-all"
+              />
+              <button
+                id="btn-save-server-url"
+                onClick={handleSaveServerUrl}
+                className="px-5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 active:scale-95 text-white font-bold text-xs shadow-md transition-all cursor-pointer whitespace-nowrap"
+              >
+                {urlSavedFeedback ? '已保存并重连！' : '保存并连接'}
+              </button>
+            </div>
+
+            <div className="text-[11px] text-slate-500 space-y-1 bg-sky-50/70 p-2.5 rounded-xl border border-sky-100">
+              <p className="font-semibold text-sky-800">💡 提示说明：</p>
+              <p>
+                1. 在 Render 部署 <code className="bg-sky-200/60 px-1 py-0.5 rounded text-sky-900 font-mono">server.ts</code> 为 Web Service 后，复制公网 HTTPS 地址填入上方。
+              </p>
+              <p>
+                2. 两台设备输入相同 Render 地址后，玩家 1 创建房间，玩家 2 输入 6 位房间代码即可瞬间同步！
+              </p>
+              <p>
+                3. 您也可以在 GitHub 仓库中配置变量 <code className="bg-sky-200/60 px-1 py-0.5 rounded text-sky-900 font-mono">VITE_SOCKET_URL</code>，重新发布后即可免手动配置。
+              </p>
+            </div>
+          </div>
+        )}
         {/* Error message banner */}
         {errorMessage && (
           <div className="w-full mb-4 px-4 py-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-sm font-semibold flex items-center justify-between shadow-sm animate-fade-in">

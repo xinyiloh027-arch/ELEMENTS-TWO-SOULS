@@ -463,7 +463,7 @@ export type GameStatus = 'menu' | 'playing' | 'completed';
 
 export type GameMode = 'local' | 'online';
 
-export type ConnectionStatus = 'connecting' | 'connected' | 'reconnecting' | 'disconnected';
+export type ConnectionStatus = 'connecting' | 'connected' | 'reconnecting' | 'disconnected' | 'unconfigured';
 
 export interface RoomPlayer {
   id: PlayerId;

@@ -7,23 +7,56 @@ import { ButtonSyncPayload, GateSyncPayload, PlayerSyncPayload } from './src/typ
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = Number(process.env.PORT) || 3000;
   const httpServer = http.createServer(app);
+
+  // Enable CORS for all HTTP requests to support remote frontend health checks
+  app.use((_req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    if (_req.method === 'OPTIONS') {
+      return res.sendStatus(200);
+    }
+    next();
+  });
 
   const io = new SocketIOServer(httpServer, {
     cors: {
       origin: '*',
       methods: ['GET', 'POST'],
+      credentials: true,
     },
-    pingInterval: 8000,
-    pingTimeout: 5000,
+    transports: ['websocket', 'polling'],
+    allowEIO3: true,
+    pingInterval: 10000,
+    pingTimeout: 7000,
   });
 
   const roomManager = new RoomManager();
 
-  // API Health Endpoint
-  app.get('/api/health', (_req, res) => {
-    res.json({ status: 'ok', onlinePlayers: io.engine.clientsCount });
+  // API Health & Root Endpoints (for Render health checks and pingers)
+  app.get(['/', '/health', '/api/health'], (_req, res, next) => {
+    // If client specifically asks for health or JSON, or root is requested on backend-only deployment
+    if (_req.path !== '/' || _req.headers.accept?.includes('application/json') || process.env.NODE_ENV === 'production') {
+      const distIndex = path.join(process.cwd(), 'dist', 'index.html');
+      // If root is requested and frontend build is present, let it fall through to static handler
+      if (_req.path === '/' && process.env.NODE_ENV === 'production') {
+        const fs = require('fs');
+        if (fs.existsSync(distIndex)) {
+          return next();
+        }
+      }
+      return res.json({
+        status: 'ok',
+        game: 'DUALITY: Bound by Elements',
+        service: 'Multiplayer Socket.IO Server',
+        onlinePlayers: io.engine.clientsCount,
+        port: PORT,
+        timestamp: new Date().toISOString(),
+      });
+    }
+    next();
   });
 
   // Socket.IO Multiplayer Event Handlers
@@ -227,14 +260,27 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
+    const indexPath = path.join(distPath, 'index.html');
+    const fs = await import('fs');
+    if (fs.existsSync(distPath)) {
+      app.use(express.static(distPath));
+    }
     app.get('*', (_req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
+      if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+      } else {
+        res.json({
+          status: 'ok',
+          service: 'DUALITY: Bound by Elements Multiplayer Server',
+          onlinePlayers: io.engine.clientsCount,
+          frontend: 'https://xinyiloh027-arch.github.io/ELEMENTS-TWO-SOULS/',
+        });
+      }
     });
   }
 
   httpServer.listen(PORT, '0.0.0.0', () => {
-    console.log(`Twin Quest Multiplayer Server running on http://0.0.0.0:${PORT}`);
+    console.log(`DUALITY Multiplayer Server running on http://0.0.0.0:${PORT}`);
   });
 }
 

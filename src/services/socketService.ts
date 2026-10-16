@@ -15,8 +15,83 @@ import {
 
 type Listener<T> = (data: T) => void;
 
+/**
+ * Normalizes a raw URL string:
+ * - Trims whitespace
+ * - Ensures https:// (or http:// for localhost)
+ * - Removes trailing slash
+ * - Upgrades to https:// if running on an HTTPS page to prevent mixed-content blocks
+ */
+export function normalizeServerUrl(rawUrl: string): string {
+  let url = rawUrl.trim();
+  if (!url) return '';
+
+  if (!/^https?:\/\//i.test(url)) {
+    if (url.startsWith('localhost') || url.startsWith('127.0.0.1')) {
+      url = `http://${url}`;
+    } else {
+      url = `https://${url}`;
+    }
+  }
+
+  // If the browser page is HTTPS, enforce https:// for the socket server
+  if (
+    typeof window !== 'undefined' &&
+    window.location.protocol === 'https:' &&
+    url.startsWith('http://') &&
+    !url.includes('localhost') &&
+    !url.includes('127.0.0.1')
+  ) {
+    url = url.replace(/^http:\/\//i, 'https://');
+  }
+
+  return url.replace(/\/+$/, '');
+}
+
+/**
+ * Resolves the default socket server URL:
+ * 1. User manual override stored in localStorage
+ * 2. Vite environment variable VITE_SOCKET_URL (injected during build)
+ * 3. Localhost fallback when running locally
+ * 4. Empty string if on GitHub Pages with no backend URL configured yet
+ */
+export function getDefaultServerUrl(): string {
+  if (typeof window !== 'undefined') {
+    try {
+      const stored =
+        localStorage.getItem('duality_socket_url') ||
+        localStorage.getItem('twinquest_socket_url');
+      if (stored && stored.trim()) {
+        return normalizeServerUrl(stored);
+      }
+    } catch {
+      // Ignore localStorage access issues
+    }
+  }
+
+  const envUrl = (import.meta as any).env?.VITE_SOCKET_URL;
+  if (envUrl && typeof envUrl === 'string' && envUrl.trim()) {
+    return normalizeServerUrl(envUrl);
+  }
+
+  // Local development fallback
+  if (typeof window !== 'undefined') {
+    const isLocalhost =
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1';
+    if (isLocalhost) {
+      return window.location.port === '3000'
+        ? window.location.origin
+        : 'http://localhost:3000';
+    }
+  }
+
+  return '';
+}
+
 class SocketService {
   private socket: Socket | null = null;
+  private currentConnectedUrl: string = '';
   private connectionStatus: ConnectionStatus = 'disconnected';
   private pingMs: number = 0;
   private pingIntervalId: any = null;
@@ -37,7 +112,31 @@ class SocketService {
   private restartListeners: Set<() => void> = new Set();
   private levelCompleteListeners: Set<() => void> = new Set();
   private changeLevelListeners: Set<Listener<{ levelId: number }>> = new Set();
-  private teammateDisconnectListeners: Set<Listener<{ playerId?: PlayerId; message?: string }>> = new Set();
+  private teammateDisconnectListeners: Set<
+    Listener<{ playerId?: PlayerId; message?: string }>
+  > = new Set();
+
+  public getServerUrl(): string {
+    return getDefaultServerUrl();
+  }
+
+  public setServerUrl(newUrl: string): void {
+    const normalized = normalizeServerUrl(newUrl);
+    if (typeof window !== 'undefined') {
+      try {
+        if (normalized) {
+          localStorage.setItem('duality_socket_url', normalized);
+        } else {
+          localStorage.removeItem('duality_socket_url');
+        }
+      } catch {
+        // Ignore storage error
+      }
+    }
+    // Reconnect to the new URL immediately
+    this.disconnect();
+    this.connect();
+  }
 
   public getStatus(): ConnectionStatus {
     return this.connectionStatus;
@@ -51,30 +150,42 @@ class SocketService {
     return this.socket?.id;
   }
 
-  public connect(): void {
-    if (this.socket && this.socket.connected) return;
+  public connect(customUrl?: string): void {
+    const targetUrl = customUrl ? normalizeServerUrl(customUrl) : this.getServerUrl();
 
+    if (!targetUrl) {
+      this.setStatus('unconfigured');
+      return;
+    }
+
+    // If socket exists and is already connected or connecting to the exact same URL, do nothing
+    if (this.socket && this.currentConnectedUrl === targetUrl) {
+      if (this.socket.connected) {
+        this.setStatus('connected');
+        return;
+      }
+      if (this.connectionStatus === 'connecting') {
+        return;
+      }
+    }
+
+    // Clean up any previous socket instance
+    this.disconnect();
+
+    this.currentConnectedUrl = targetUrl;
     this.setStatus('connecting');
 
-    // Connect to optional remote backend or same origin
-    const socketUrl = (import.meta as any).env?.VITE_SOCKET_URL || undefined;
-    this.socket = socketUrl
-      ? io(socketUrl, {
-          autoConnect: true,
-          reconnection: true,
-          reconnectionAttempts: 15,
-          reconnectionDelay: 1000,
-          reconnectionDelayMax: 4000,
-          timeout: 6000,
-        })
-      : io({
-          autoConnect: true,
-          reconnection: true,
-          reconnectionAttempts: 15,
-          reconnectionDelay: 1000,
-          reconnectionDelayMax: 4000,
-          timeout: 6000,
-        });
+    // Connect with WebSocket prioritized and polling fallback for cloud hosting (Render)
+    this.socket = io(targetUrl, {
+      transports: ['websocket', 'polling'],
+      autoConnect: true,
+      reconnection: true,
+      reconnectionAttempts: 25,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      timeout: 10000,
+      withCredentials: true,
+    });
 
     this.socket.on('connect', () => {
       this.setStatus('connected');
@@ -157,9 +268,12 @@ class SocketService {
       this.changeLevelListeners.forEach((fn) => fn(data));
     });
 
-    this.socket.on('teammate_disconnected', (data: { playerId?: PlayerId; message?: string }) => {
-      this.teammateDisconnectListeners.forEach((fn) => fn(data));
-    });
+    this.socket.on(
+      'teammate_disconnected',
+      (data: { playerId?: PlayerId; message?: string }) => {
+        this.teammateDisconnectListeners.forEach((fn) => fn(data));
+      }
+    );
   }
 
   private startPingLoop() {
@@ -195,7 +309,6 @@ class SocketService {
 
   public subscribePing(fn: Listener<number>): () => void {
     this.pingListeners.add(fn);
-    fn(this.pingMs);
     return () => this.pingListeners.delete(fn);
   }
 
@@ -264,7 +377,9 @@ class SocketService {
     return () => this.changeLevelListeners.delete(fn);
   }
 
-  public subscribeTeammateDisconnect(fn: Listener<{ playerId?: PlayerId; message?: string }>): () => void {
+  public subscribeTeammateDisconnect(
+    fn: Listener<{ playerId?: PlayerId; message?: string }>
+  ): () => void {
     this.teammateDisconnectListeners.add(fn);
     return () => this.teammateDisconnectListeners.delete(fn);
   }
@@ -277,18 +392,28 @@ class SocketService {
     room?: RoomState;
     error?: string;
   }> {
+    if (!this.getServerUrl()) {
+      return {
+        success: false,
+        error:
+          '尚未配置 Render 联机服务器地址。请在下方输入您的后端服务公网 URL (如 https://xxxx.onrender.com)。',
+      };
+    }
+
     this.connect();
+
     return new Promise((resolve) => {
       if (!this.socket) {
         return resolve({ success: false, error: 'Socket 初始化失败' });
       }
+
       const timer = setTimeout(() => {
         resolve({
           success: false,
           error:
-            '联机服务器暂未响应。GitHub Pages 静态托管提供完整的 20 关单人/本地双人合作体验；在线联机需运行后端 WebSocket 实例。',
+            '连接服务器超时。Render 免费实例初次启动需约 30-50 秒（冷启动），请稍候重试。',
         });
-      }, 4000);
+      }, 9000);
 
       this.socket.emit('create_room', { playerName }, (res: any) => {
         clearTimeout(timer);
@@ -297,25 +422,38 @@ class SocketService {
     });
   }
 
-  public async joinRoom(roomCode: string, playerName: string = 'James'): Promise<{
+  public async joinRoom(
+    roomCode: string,
+    playerName: string = 'James'
+  ): Promise<{
     success: boolean;
     roomCode?: string;
     player?: RoomPlayer;
     room?: RoomState;
     error?: string;
   }> {
+    if (!this.getServerUrl()) {
+      return {
+        success: false,
+        error:
+          '尚未配置 Render 联机服务器地址。请在下方输入您的后端服务公网 URL (如 https://xxxx.onrender.com)。',
+      };
+    }
+
     this.connect();
+
     return new Promise((resolve) => {
       if (!this.socket) {
         return resolve({ success: false, error: 'Socket 初始化失败' });
       }
+
       const timer = setTimeout(() => {
         resolve({
           success: false,
           error:
-            '联机服务器暂未响应。GitHub Pages 静态托管提供完整的 20 关单人/本地双人合作体验；在线联机需运行后端 WebSocket 实例。',
+            '连接服务器超时。Render 免费实例初次启动需约 30-50 秒（冷启动），请稍候重试。',
         });
-      }, 4000);
+      }, 9000);
 
       this.socket.emit('join_room', { roomCode, playerName }, (res: any) => {
         clearTimeout(timer);
@@ -324,9 +462,11 @@ class SocketService {
     });
   }
 
-  public async setReady(isReady: boolean): Promise<{ success: boolean; isReady?: boolean; error?: string }> {
+  public async setReady(
+    isReady: boolean
+  ): Promise<{ success: boolean; isReady?: boolean; error?: string }> {
     return new Promise((resolve) => {
-      if (!this.socket) {
+      if (!this.socket || !this.socket.connected) {
         return resolve({ success: false, error: '未连接服务器' });
       }
       this.socket.emit('set_ready', { isReady }, (res: any) => {
@@ -395,9 +535,12 @@ class SocketService {
   public disconnect(): void {
     this.stopPingLoop();
     if (this.socket) {
+      this.socket.removeAllListeners();
       this.socket.disconnect();
       this.socket = null;
     }
+    this.currentConnectedUrl = '';
+    this.setStatus('disconnected');
   }
 }
 
