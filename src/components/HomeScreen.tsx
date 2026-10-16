@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Play, Sparkles, Gamepad2, ArrowRight, Users, Grid, Volume2, VolumeX } from 'lucide-react';
 import { soundManager, SoundSettings } from '../services/soundManager';
+import duoHeroImg from '../assets/images/elements_hero_duo_1792174853275.jpg';
+import jamesPortraitImg from '../assets/images/james_fire_boy_1792174873003.jpg';
+import xinyiPortraitImg from '../assets/images/xinyi_water_girl_1792174888516.jpg';
 
 interface HomeScreenProps {
   onStartLocalGame: () => void;
@@ -86,28 +89,49 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </p>
         </div>
 
+        {/* Dreamy Duo Illustration Showcase: James & Xinyi */}
+        <div className="relative w-full max-w-xl mx-auto rounded-3xl overflow-hidden shadow-2xl border-4 border-white/90 bg-gradient-to-tr from-sky-100 via-white to-amber-100 p-2 sm:p-2.5 transition-all duration-300 hover:shadow-sky-300/40 hover:scale-[1.01] animate-float-slow">
+          <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-inner">
+            <img
+              src={duoHeroImg}
+              alt="James & Xinyi - ELEMENTS: TWO SOULS"
+              className="w-full h-full object-cover object-center select-none"
+              loading="eager"
+            />
+            {/* Dreamy badges on bottom corners */}
+            <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4 bg-gradient-to-t from-slate-900/65 via-slate-900/25 to-transparent flex items-end justify-between text-white text-xs sm:text-sm font-bold">
+              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-500/85 backdrop-blur-md border border-white/40 shadow-xs">
+                💧 Xinyi (Water)
+              </span>
+              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500/85 backdrop-blur-md border border-white/40 shadow-xs">
+                🔥 James (Fire)
+              </span>
+            </div>
+          </div>
+        </div>
+
         {/* Character Preview Showcase */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
           {/* Xinyi Card */}
           <div className="flex flex-col items-center p-5 rounded-2xl bg-white/90 border-2 border-sky-200 shadow-sm transition-all hover:shadow-md hover:border-sky-400">
-            {/* Cute Xinyi Avatar */}
-            <div className="relative w-20 h-20 mb-3 flex items-center justify-center">
-              <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-sky-500 to-sky-400 shadow-md flex items-center justify-center border-2 border-sky-600">
-                {/* Eyes and blush */}
-                <div className="flex items-center gap-3">
-                  <div className="w-2.5 h-2.5 rounded-full bg-slate-900 ring-2 ring-white/50" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-slate-900 ring-2 ring-white/50" />
-                </div>
+            {/* Cute Xinyi Illustrated Avatar */}
+            <div className="relative w-24 h-24 mb-3 flex items-center justify-center">
+              <div className="w-20 h-20 rounded-full overflow-hidden shadow-md border-3 border-sky-400 bg-sky-100 ring-4 ring-sky-100/80 transition-transform hover:scale-105">
+                <img
+                  src={xinyiPortraitImg}
+                  alt="Xinyi - Water Girl"
+                  className="w-full h-full object-cover object-top select-none"
+                />
               </div>
-              <div className="absolute -top-1 px-2 py-0.5 rounded-full bg-sky-100 border border-sky-300 text-[11px] font-bold text-sky-700">
-                玩家 1
+              <div className="absolute -top-1 px-2.5 py-0.5 rounded-full bg-sky-100 border border-sky-300 text-[11px] font-black text-sky-700 shadow-2xs">
+                玩家 1 · P1
               </div>
             </div>
 
             <div className="flex items-center gap-1.5 text-lg font-black text-sky-600 mb-1">
-              <span>🔵 Xinyi</span>
+              <span>🔵 Xinyi (水)</span>
             </div>
-            <p className="text-xs text-slate-500 mb-3 font-medium">水蓝色的敏捷伙伴</p>
+            <p className="text-xs text-slate-500 mb-3 font-medium">水蓝色的敏捷伙伴 · 流动如溪</p>
 
             {/* Keys */}
             <div className="flex items-center gap-2 pt-2 border-t border-sky-100 w-full justify-center">
@@ -122,24 +146,24 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
           {/* James Card */}
           <div className="flex flex-col items-center p-5 rounded-2xl bg-white/90 border-2 border-orange-200 shadow-sm transition-all hover:shadow-md hover:border-orange-400">
-            {/* Cute James Avatar */}
-            <div className="relative w-20 h-20 mb-3 flex items-center justify-center">
-              <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-orange-500 to-amber-400 shadow-md flex items-center justify-center border-2 border-orange-600">
-                {/* Eyes and blush */}
-                <div className="flex items-center gap-3">
-                  <div className="w-2.5 h-2.5 rounded-full bg-slate-900 ring-2 ring-white/50" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-slate-900 ring-2 ring-white/50" />
-                </div>
+            {/* Cute James Illustrated Avatar */}
+            <div className="relative w-24 h-24 mb-3 flex items-center justify-center">
+              <div className="w-20 h-20 rounded-full overflow-hidden shadow-md border-3 border-orange-400 bg-orange-100 ring-4 ring-orange-100/80 transition-transform hover:scale-105">
+                <img
+                  src={jamesPortraitImg}
+                  alt="James - Fire Boy"
+                  className="w-full h-full object-cover object-top select-none"
+                />
               </div>
-              <div className="absolute -top-1 px-2 py-0.5 rounded-full bg-orange-100 border border-orange-300 text-[11px] font-bold text-orange-700">
-                玩家 2
+              <div className="absolute -top-1 px-2.5 py-0.5 rounded-full bg-orange-100 border border-orange-300 text-[11px] font-black text-orange-700 shadow-2xs">
+                玩家 2 · P2
               </div>
             </div>
 
             <div className="flex items-center gap-1.5 text-lg font-black text-orange-600 mb-1">
-              <span>🟠 James</span>
+              <span>🟠 James (火)</span>
             </div>
-            <p className="text-xs text-slate-500 mb-3 font-medium">暖橙色的热情伙伴</p>
+            <p className="text-xs text-slate-500 mb-3 font-medium">暖橙色的热情伙伴 · 跃动如焰</p>
 
             {/* Keys */}
             <div className="flex items-center gap-2 pt-2 border-t border-orange-100 w-full justify-center">
