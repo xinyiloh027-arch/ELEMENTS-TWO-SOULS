@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowLeft, ArrowRight, ArrowUp } from 'lucide-react';
 import { GameMode, PlayerId } from '../types';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface TouchControlsProps {
   onInput: (player: PlayerId, key: 'left' | 'right' | 'jump', isPressed: boolean) => void;
@@ -13,6 +14,8 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
   gameMode = 'local' as GameMode,
   assignedPlayer = 'xinyi' as PlayerId,
 }) => {
+  const { t } = useLanguage();
+
   const createButtonHandlers = (player: PlayerId, key: 'left' | 'right' | 'jump') => {
     return {
       onTouchStart: (e: React.TouchEvent) => {
@@ -50,7 +53,7 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
     const isXinyi = assignedPlayer === 'xinyi' || (assignedPlayer as string) === 'lumi';
     const playerTheme = isXinyi
       ? {
-          name: 'Xinyi (你正在操控 🔵)',
+          name: t.touch.controllingP1,
           border: 'border-sky-400/50',
           gradient: 'from-sky-500 to-sky-700 active:from-sky-400 active:to-sky-600',
           jumpGradient: 'from-cyan-400 to-sky-600 active:from-cyan-300 active:to-sky-500',
@@ -58,7 +61,7 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
           dot: 'bg-sky-400 shadow-[0_0_8px_#38bdf8]',
         }
       : {
-          name: 'James (你正在操控 🟠)',
+          name: t.touch.controllingP2,
           border: 'border-orange-400/50',
           gradient: 'from-orange-500 to-orange-700 active:from-orange-400 active:to-orange-600',
           jumpGradient: 'from-amber-400 to-orange-600 active:from-amber-300 active:to-orange-500',
@@ -79,7 +82,7 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
               id="touch-online-left"
               {...createButtonHandlers(assignedPlayer, 'left')}
               className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-b ${playerTheme.gradient} text-white flex items-center justify-center font-black shadow-lg border active:scale-90 active:translate-y-0.5 transition-transform cursor-pointer`}
-              aria-label="向左移动"
+              aria-label={t.touch.ariaMoveLeft}
             >
               <ArrowLeft className="w-8 h-8 sm:w-9 sm:h-9" />
             </button>
@@ -87,7 +90,7 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
               id="touch-online-right"
               {...createButtonHandlers(assignedPlayer, 'right')}
               className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-b ${playerTheme.gradient} text-white flex items-center justify-center font-black shadow-lg border active:scale-90 active:translate-y-0.5 transition-transform cursor-pointer`}
-              aria-label="向右移动"
+              aria-label={t.touch.ariaMoveRight}
             >
               <ArrowRight className="w-8 h-8 sm:w-9 sm:h-9" />
             </button>
@@ -96,12 +99,12 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
 
         {/* Right Thumb: Giant Jump Button (Min 64x64) */}
         <div className="pointer-events-auto flex flex-col items-end gap-1.5 bg-slate-900/90 backdrop-blur-md p-3 rounded-3xl border shadow-2xl">
-          <div className="text-xs font-black px-1 text-slate-400">跳跃 (JUMP)</div>
+          <div className="text-xs font-black px-1 text-slate-400">{t.touch.jump} (JUMP)</div>
           <button
             id="touch-online-jump"
             {...createButtonHandlers(assignedPlayer, 'jump')}
             className={`w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-b ${playerTheme.jumpGradient} text-white flex flex-col items-center justify-center font-black shadow-xl border-2 active:scale-90 active:translate-y-1 transition-transform cursor-pointer`}
-            aria-label="跳跃"
+            aria-label={t.touch.ariaJump}
           >
             <ArrowUp className="w-9 h-9 sm:w-10 sm:h-10" />
             <span className="text-xs font-black tracking-wider">JUMP</span>
@@ -125,7 +128,7 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
             id="touch-xinyi-left"
             {...createButtonHandlers('xinyi', 'left')}
             className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-b from-sky-500 to-sky-700 active:from-sky-400 active:to-sky-600 text-white flex items-center justify-center font-black shadow-lg shadow-sky-950/50 border border-sky-400/50 active:scale-90 active:translate-y-0.5 transition-transform cursor-pointer"
-            aria-label="Xinyi 向左移动"
+            aria-label={`Xinyi ${t.touch.ariaMoveLeft}`}
           >
             <ArrowLeft className="w-7 h-7 sm:w-8 sm:h-8" />
           </button>
@@ -133,7 +136,7 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
             id="touch-xinyi-jump"
             {...createButtonHandlers('xinyi', 'jump')}
             className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-b from-cyan-400 to-sky-600 active:from-cyan-300 active:to-sky-500 text-white flex items-center justify-center font-black shadow-lg shadow-sky-950/50 border border-cyan-300/60 active:scale-90 active:translate-y-0.5 transition-transform cursor-pointer"
-            aria-label="Xinyi 跳跃"
+            aria-label={`Xinyi ${t.touch.ariaJump}`}
           >
             <ArrowUp className="w-7 h-7 sm:w-8 sm:h-8" />
           </button>
@@ -141,7 +144,7 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
             id="touch-xinyi-right"
             {...createButtonHandlers('xinyi', 'right')}
             className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-b from-sky-500 to-sky-700 active:from-sky-400 active:to-sky-600 text-white flex items-center justify-center font-black shadow-lg shadow-sky-950/50 border border-sky-400/50 active:scale-90 active:translate-y-0.5 transition-transform cursor-pointer"
-            aria-label="Xinyi 向右移动"
+            aria-label={`Xinyi ${t.touch.ariaMoveRight}`}
           >
             <ArrowRight className="w-7 h-7 sm:w-8 sm:h-8" />
           </button>
@@ -159,7 +162,7 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
             id="touch-james-left"
             {...createButtonHandlers('james', 'left')}
             className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-b from-orange-500 to-orange-700 active:from-orange-400 active:to-orange-600 text-white flex items-center justify-center font-black shadow-lg shadow-orange-950/50 border border-orange-400/50 active:scale-90 active:translate-y-0.5 transition-transform cursor-pointer"
-            aria-label="James 向左移动"
+            aria-label={`James ${t.touch.ariaMoveLeft}`}
           >
             <ArrowLeft className="w-7 h-7 sm:w-8 sm:h-8" />
           </button>
@@ -167,7 +170,7 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
             id="touch-james-jump"
             {...createButtonHandlers('james', 'jump')}
             className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-b from-amber-400 to-orange-600 active:from-amber-300 active:to-orange-500 text-white flex items-center justify-center font-black shadow-lg shadow-orange-950/50 border border-amber-300/60 active:scale-90 active:translate-y-0.5 transition-transform cursor-pointer"
-            aria-label="James 跳跃"
+            aria-label={`James ${t.touch.ariaJump}`}
           >
             <ArrowUp className="w-7 h-7 sm:w-8 sm:h-8" />
           </button>
@@ -175,7 +178,7 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
             id="touch-james-right"
             {...createButtonHandlers('james', 'right')}
             className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-b from-orange-500 to-orange-700 active:from-orange-400 active:to-orange-600 text-white flex items-center justify-center font-black shadow-lg shadow-orange-950/50 border border-orange-400/50 active:scale-90 active:translate-y-0.5 transition-transform cursor-pointer"
-            aria-label="James 向右移动"
+            aria-label={`James ${t.touch.ariaMoveRight}`}
           >
             <ArrowRight className="w-7 h-7 sm:w-8 sm:h-8" />
           </button>

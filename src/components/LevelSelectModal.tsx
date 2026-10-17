@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, Lock, CheckCircle2, Play, Sparkles } from 'lucide-react';
 import { LEVEL_METADATA_LIST } from '../levels';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface LevelSelectModalProps {
   currentLevelId: number;
@@ -15,6 +16,8 @@ export const LevelSelectModal: React.FC<LevelSelectModalProps> = ({
   onSelectLevel,
   onClose,
 }) => {
+  const { t, language } = useLanguage();
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200 select-none">
       <div className="relative w-full max-w-3xl bg-slate-900 border-2 border-slate-700/80 rounded-3xl p-5 sm:p-7 text-white shadow-2xl flex flex-col max-h-[92vh]">
@@ -26,13 +29,13 @@ export const LevelSelectModal: React.FC<LevelSelectModalProps> = ({
             </div>
             <div>
               <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white flex items-center gap-2">
-                <span>LEVEL SELECT</span>
+                <span>{t.levelSelect.modalTitle}</span>
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
-                  关卡选择 (01 ~ 20)
+                  {t.levelSelect.modalBadge}
                 </span>
               </h2>
               <p className="text-xs text-slate-400">
-                双人合作平台解谜 · 解锁进度：{Math.min(unlockedLevel, 20)} / 20 关
+                {t.levelSelect.modalSubtitle} {Math.min(unlockedLevel, 20)} / 20
               </p>
             </div>
           </div>
@@ -51,6 +54,7 @@ export const LevelSelectModal: React.FC<LevelSelectModalProps> = ({
             const isUnlocked = meta.id <= unlockedLevel;
             const isCurrent = meta.id === currentLevelId;
             const isCompleted = meta.id < unlockedLevel;
+            const i18nMeta = t.levels.find((l) => l.id === meta.id) || meta;
 
             return (
               <div
@@ -61,11 +65,11 @@ export const LevelSelectModal: React.FC<LevelSelectModalProps> = ({
                   }
                 }}
                 className={`relative group rounded-2xl p-4 border transition-all select-none flex items-center justify-between ${
-                  isUnlocked
-                    ? isCurrent
-                      ? 'bg-slate-800/95 border-sky-400 shadow-lg shadow-sky-500/10 cursor-pointer ring-2 ring-sky-500/30'
-                      : 'bg-slate-800/60 hover:bg-slate-800 border-slate-700/80 hover:border-slate-500 cursor-pointer active:scale-98'
-                    : 'bg-slate-900/50 border-slate-800/60 opacity-60 cursor-not-allowed'
+                  !isUnlocked
+                    ? 'bg-slate-900/50 border-slate-800/60 opacity-60 cursor-not-allowed'
+                    : isCurrent
+                    ? 'bg-slate-800/95 border-sky-400 shadow-lg shadow-sky-500/10 cursor-pointer ring-2 ring-sky-500/30'
+                    : 'bg-slate-800/60 hover:bg-slate-800 border-slate-700/80 hover:border-slate-500 cursor-pointer active:scale-98'
                 }`}
               >
                 <div className="flex items-center gap-3.5">
@@ -94,25 +98,26 @@ export const LevelSelectModal: React.FC<LevelSelectModalProps> = ({
                           isCurrent ? 'text-sky-400' : 'text-slate-200'
                         }`}
                       >
-                        {meta.title}
+                        {i18nMeta.title}
                       </span>
                       {isCompleted && (
                         <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-emerald-400">
                           <CheckCircle2 className="w-3.5 h-3.5" />
-                          已通关
+                          {t.levelSelect.completedBadge}
                         </span>
                       )}
                       {isCurrent && (
                         <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-md bg-sky-500/20 text-sky-400 border border-sky-500/30">
-                          当前
+                          {t.levelSelect.currentBadge}
                         </span>
                       )}
                     </div>
                     <p className="text-xs text-slate-400 leading-tight">
-                      {meta.desc}
+                      {i18nMeta.desc}
                     </p>
                     <div className="text-[11px] text-amber-400/90 font-medium pt-0.5">
-                      难度: {meta.difficulty}
+                      {language === 'zh' ? '难度: ' : 'Difficulty: '}
+                      {i18nMeta.difficulty}
                     </div>
                   </div>
                 </div>
@@ -142,12 +147,16 @@ export const LevelSelectModal: React.FC<LevelSelectModalProps> = ({
 
         {/* Footer info */}
         <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
-          <span>提示：两名玩家都到达 EXIT 即可解锁下一关。</span>
+          <span>
+            {language === 'zh'
+              ? '提示：两名玩家都到达 EXIT 即可解锁下一关。'
+              : 'Tip: Both players must reach EXIT together to unlock the next level.'}
+          </span>
           <button
             onClick={onClose}
             className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold cursor-pointer border border-slate-700"
           >
-            关闭
+            {language === 'zh' ? '关闭' : 'Close'}
           </button>
         </div>
       </div>

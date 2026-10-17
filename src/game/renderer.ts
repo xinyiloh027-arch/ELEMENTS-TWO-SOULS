@@ -28,6 +28,7 @@ import {
   WorldPlatform,
   WorldSwitch,
 } from '../types';
+import { getCurrentTranslations } from '../i18n/LanguageContext';
 
 export interface ExtraUIOptions {
   cameraX?: number;
@@ -536,13 +537,14 @@ export class GameRenderer {
 
       // Indicator icon & label above button
       const floatingY = y - 10 + Math.sin(time * 0.005 + (isP1 ? 0 : Math.PI)) * 2;
+      const t = getCurrentTranslations();
       ctx.fillStyle = btn.isFake ? '#94a3b8' : (isP1 ? '#0284c7' : '#ea580c');
       if (btn.isFake) {
         ctx.fillText('⚠️ DECOY SWITCH', x + width / 2, floatingY);
       } else if (btn.weightPlate) {
         ctx.fillText(btn.label || '⚖️ WEIGHT SENSOR', x + width / 2, floatingY);
       } else {
-        ctx.fillText(btn.label || (isP1 ? '🔵 XINYI 踏板' : '🟠 JAMES 踏板'), x + width / 2, floatingY);
+        ctx.fillText(btn.label || (isP1 ? t.inGame.xinyiSwitch : t.inGame.jamesSwitch), x + width / 2, floatingY);
       }
 
       if (btn.countdownTimer !== undefined && btn.countdownTimer > 0) {
@@ -554,7 +556,7 @@ export class GameRenderer {
       // Status pill: ON / OFF
       ctx.font = 'bold 9px sans-serif';
       ctx.fillStyle = isPressed ? '#10b981' : '#64748b';
-      ctx.fillText(isPressed ? '✓ 激活中' : '未踩下', x + width / 2, floatingY + 12);
+      ctx.fillText(isPressed ? t.inGame.switchActivated : t.inGame.switchReleased, x + width / 2, floatingY + 12);
 
       ctx.restore();
     }
@@ -688,11 +690,13 @@ export class GameRenderer {
         ctx.fillText(text, badgeCenterX, badgeY + 5);
 
         // Subtitle: Players can pass
+        const t = getCurrentTranslations();
         ctx.font = 'bold 9px sans-serif';
         ctx.fillStyle = '#6ee7b7';
-        ctx.fillText('两名玩家可通行 · 踩住保持开启', badgeCenterX, badgeY + 24);
+        ctx.fillText(t.inGame.gateOpenDesc, badgeCenterX, badgeY + 24);
       } else {
         // 3. KEEP THE SWITCHES ACTIVE! (One player stepped off, door held by safety guarantee)
+        const t = getCurrentTranslations();
         ctx.font = '900 12px sans-serif';
         ctx.textAlign = 'center';
         const text = 'KEEP THE SWITCHES ACTIVE!';
@@ -714,21 +718,22 @@ export class GameRenderer {
         ctx.font = 'bold 9px sans-serif';
         ctx.fillStyle = '#fde68a';
         if ((gate.minOpenTimer || 0) > 0) {
-          ctx.fillText(`安全保持中: ${safeTimerSec}s · 请保持踩下`, badgeCenterX, badgeY + 23);
+          ctx.fillText(`${t.inGame.gateHoldDesc}${safeTimerSec}s`, badgeCenterX, badgeY + 23);
         } else {
-          ctx.fillText('踏板已释放 · 即将关门', badgeCenterX, badgeY + 23);
+          ctx.fillText(t.inGame.gateClosingSoon, badgeCenterX, badgeY + 23);
         }
       }
     } else {
       // 4. CLOSED state
+      const t = getCurrentTranslations();
       ctx.font = 'bold 11px sans-serif';
       ctx.textAlign = 'center';
       ctx.fillStyle = '#e2e8f0';
-      ctx.fillText('🔒 双人机关门', badgeCenterX, badgeY + 8);
+      ctx.fillText(t.inGame.coopGate, badgeCenterX, badgeY + 8);
 
-      let hintText = '需两人同时踩住蓝橙踏板';
-      if (xinyiPressed && !jamesPressed) hintText = '等待 James 踩下橙色踏板!';
-      if (!xinyiPressed && jamesPressed) hintText = '等待 Xinyi 踩下蓝色踏板!';
+      let hintText = t.inGame.hintBothSwitches;
+      if (xinyiPressed && !jamesPressed) hintText = t.inGame.hintWaitJames;
+      if (!xinyiPressed && jamesPressed) hintText = t.inGame.hintWaitXinyi;
       ctx.font = 'bold 10px sans-serif';
       ctx.fillStyle = (xinyiPressed || jamesPressed) ? '#fbbf24' : '#94a3b8';
       ctx.fillText(hintText, badgeCenterX, badgeY - 8);
@@ -1932,11 +1937,12 @@ export class GameRenderer {
     ctx.lineWidth = 2;
     ctx.stroke();
 
+    const t = getCurrentTranslations();
     ctx.font = 'bold 14px sans-serif';
     ctx.fillStyle = '#fbbf24';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('⚠️ 保持靠近！距离过远将限制前行', cx, cy);
+    ctx.fillText(t.inGame.warningStayClose, cx, cy);
     ctx.restore();
   }
 
@@ -2038,12 +2044,13 @@ export class GameRenderer {
     );
 
     // Subtitle
+    const t = getCurrentTranslations();
     ctx.font = 'bold 18px sans-serif';
     ctx.fillStyle = '#34d399';
     ctx.fillText(
       isFinalVictory
-        ? '👑 恭喜 James & Xinyi 登峰造极！双人终极默契大圆满！'
-        : '★ 双人合璧 · 成功通关！准备前往下一关 ★',
+        ? t.inGame.victoryUltimate
+        : t.inGame.victoryNormal,
       cx,
       cy + (isFinalVictory ? 10 : 16)
     );
@@ -2053,8 +2060,8 @@ export class GameRenderer {
     ctx.fillStyle = '#94a3b8';
     ctx.fillText(
       isFinalVictory
-        ? '🎉 感谢游玩！所有关卡已解锁，可随时在选关界面体验任意挑战。'
-        : '即将进入下一关卡或返回关卡选择...',
+        ? t.inGame.victorySubUltimate
+        : t.inGame.victorySubNormal,
       cx,
       cy + (isFinalVictory ? 48 : 46)
     );

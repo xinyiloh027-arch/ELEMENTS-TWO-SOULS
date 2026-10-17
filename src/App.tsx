@@ -5,6 +5,7 @@ import { OnlineLobbyView } from './components/OnlineLobbyView';
 import { LevelSelectModal } from './components/LevelSelectModal';
 import { GameMode, PlayerId } from './types';
 import { socketService } from './services/socketService';
+import { LanguageProvider } from './i18n/LanguageContext';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<'home' | 'online-lobby' | 'game'>('home');
@@ -91,45 +92,47 @@ export default function App() {
   };
 
   return (
-    <div className="w-full h-full min-h-screen bg-slate-950 font-sans text-slate-100">
-      {currentView === 'home' && (
-        <>
-          <HomeScreen
-            onStartLocalGame={handleStartLocalGame}
-            onOpenOnlineLobby={handleOpenOnlineLobby}
-            onOpenLevelSelect={() => setShowHomeLevelSelect(true)}
-            unlockedLevel={unlockedLevel}
-          />
-          {showHomeLevelSelect && (
-            <LevelSelectModal
-              currentLevelId={selectedLevelId}
+    <LanguageProvider>
+      <div className="w-full h-full min-h-screen bg-slate-950 font-sans text-slate-100">
+        {currentView === 'home' && (
+          <>
+            <HomeScreen
+              onStartLocalGame={handleStartLocalGame}
+              onOpenOnlineLobby={handleOpenOnlineLobby}
+              onOpenLevelSelect={() => setShowHomeLevelSelect(true)}
               unlockedLevel={unlockedLevel}
-              onSelectLevel={handleStartWithLevel}
-              onClose={() => setShowHomeLevelSelect(false)}
             />
-          )}
-        </>
-      )}
+            {showHomeLevelSelect && (
+              <LevelSelectModal
+                currentLevelId={selectedLevelId}
+                unlockedLevel={unlockedLevel}
+                onSelectLevel={handleStartWithLevel}
+                onClose={() => setShowHomeLevelSelect(false)}
+              />
+            )}
+          </>
+        )}
 
-      {currentView === 'online-lobby' && (
-        <OnlineLobbyView
-          onBackToHome={() => setCurrentView('home')}
-          onStartGame={handleStartOnlineGame}
-        />
-      )}
+        {currentView === 'online-lobby' && (
+          <OnlineLobbyView
+            onBackToHome={() => setCurrentView('home')}
+            onStartGame={handleStartOnlineGame}
+          />
+        )}
 
-      {currentView === 'game' && (
-        <GameCanvas
-          onReturnHome={handleReturnHome}
-          gameMode={gameMode}
-          onlineRole={onlineRole}
-          roomCode={roomCode}
-          initialLevelId={selectedLevelId}
-          unlockedLevel={unlockedLevel}
-          onUpdateUnlockedLevel={handleUpdateUnlockedLevel}
-          onLevelChanged={handleLevelChanged}
-        />
-      )}
-    </div>
+        {currentView === 'game' && (
+          <GameCanvas
+            onReturnHome={handleReturnHome}
+            gameMode={gameMode}
+            onlineRole={onlineRole}
+            roomCode={roomCode}
+            initialLevelId={selectedLevelId}
+            unlockedLevel={unlockedLevel}
+            onUpdateUnlockedLevel={handleUpdateUnlockedLevel}
+            onLevelChanged={handleLevelChanged}
+          />
+        )}
+      </div>
+    </LanguageProvider>
   );
 }

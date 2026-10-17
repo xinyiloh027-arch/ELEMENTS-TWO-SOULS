@@ -1,6 +1,7 @@
 import React from 'react';
 import { Trophy, RotateCcw, Home, Sparkles, ArrowRight, Grid, Award } from 'lucide-react';
 import { LEVEL_METADATA_LIST } from '../levels';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface LevelCompleteModalProps {
   currentLevelId: number;
@@ -21,9 +22,10 @@ export const LevelCompleteModal: React.FC<LevelCompleteModalProps> = ({
   onRestart,
   onHome,
 }) => {
+  const { t, language } = useLanguage();
   const isFinalLevel = currentLevelId === 20;
-  const currentMeta = LEVEL_METADATA_LIST.find((l) => l.id === currentLevelId);
-  const nextMeta = LEVEL_METADATA_LIST.find((l) => l.id === currentLevelId + 1);
+  const currentMeta = t.levels.find((l) => l.id === currentLevelId) || LEVEL_METADATA_LIST.find((l) => l.id === currentLevelId);
+  const nextMeta = t.levels.find((l) => l.id === currentLevelId + 1) || LEVEL_METADATA_LIST.find((l) => l.id === currentLevelId + 1);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-300 select-none">
@@ -46,17 +48,17 @@ export const LevelCompleteModal: React.FC<LevelCompleteModalProps> = ({
             <Sparkles className="w-3.5 h-3.5" />
             <span>
               {isFinalLevel
-                ? '终极通关 · 合作大师'
-                : `第 ${currentLevelId} 关 · 双人协力达成`}
+                ? t.levelComplete.ultimateBadge
+                : `${language === 'zh' ? `第 ${currentLevelId} 关` : `Level ${currentLevelId}`} · ${t.levelComplete.normalBadge}`}
             </span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white pt-1">
-            {isFinalLevel ? 'ALL 20 LEVELS COMPLETE!' : 'LEVEL COMPLETE!'}
+            {isFinalLevel ? t.levelComplete.ultimateHeading : t.levelComplete.normalHeading}
           </h2>
           <p className="text-sm text-slate-300">
             {isFinalLevel
-              ? '🎉 绝妙默契！Xinyi 与 James 成功征服了全部 20 个双人合作神殿关卡！'
-              : `太棒了！顺利通关「${currentMeta?.title || `LEVEL ${currentLevelId}`}」！`}
+              ? t.levelComplete.ultimateMsg
+              : `${t.levelComplete.normalMsgPrefix}${currentMeta?.title || `LEVEL ${currentLevelId}`}${t.levelComplete.normalMsgSuffix}`}
           </p>
         </div>
 
@@ -64,12 +66,12 @@ export const LevelCompleteModal: React.FC<LevelCompleteModalProps> = ({
         <div className="flex items-center justify-center gap-6 py-3 px-6 bg-slate-800/80 rounded-2xl border border-slate-700/80 mb-5">
           <div className="flex items-center gap-2">
             <span className="text-xl">🔵</span>
-            <span className="font-bold text-sky-400 text-sm">Xinyi (到达终点)</span>
+            <span className="font-bold text-sky-400 text-sm">Xinyi {t.levelComplete.reachedExit}</span>
           </div>
           <div className="text-slate-500 font-bold text-sm">+</div>
           <div className="flex items-center gap-2">
             <span className="text-xl">🟠</span>
-            <span className="font-bold text-orange-400 text-sm">James (到达终点)</span>
+            <span className="font-bold text-orange-400 text-sm">James {t.levelComplete.reachedExit}</span>
           </div>
         </div>
 
@@ -77,7 +79,11 @@ export const LevelCompleteModal: React.FC<LevelCompleteModalProps> = ({
         {hasNextLevel && autoAdvanceSeconds !== null && (
           <div className="mb-4 px-4 py-2 rounded-xl bg-emerald-950/60 border border-emerald-500/30 flex items-center justify-center gap-2 text-emerald-300 text-sm font-medium animate-pulse">
             <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>约 <strong>{autoAdvanceSeconds}</strong> 秒后自动进入下一关...</span>
+            <span>
+              {language === 'zh' ? '约 ' : 'About '}
+              <strong>{autoAdvanceSeconds}</strong>{' '}
+              {t.levelComplete.autoAdvancePrompt}
+            </span>
           </div>
         )}
 
@@ -90,7 +96,7 @@ export const LevelCompleteModal: React.FC<LevelCompleteModalProps> = ({
               onClick={onNextLevel}
               className="w-full h-14 rounded-2xl font-black text-lg flex items-center justify-center gap-2.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-sky-500 hover:from-emerald-400 hover:to-sky-400 text-white shadow-lg shadow-emerald-500/30 border border-white/25 active:scale-98 transition-all cursor-pointer"
             >
-              <span>进入下一关: {nextMeta?.title}</span>
+              <span>{t.levelComplete.nextLevelBtn}{nextMeta?.title}</span>
               <ArrowRight className="w-5 h-5" />
             </button>
           )}
@@ -102,7 +108,7 @@ export const LevelCompleteModal: React.FC<LevelCompleteModalProps> = ({
               className="h-12 rounded-2xl font-bold text-sm flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 active:scale-95 transition-all cursor-pointer"
             >
               <RotateCcw className="w-4 h-4" />
-              <span>重玩本关</span>
+              <span>{t.levelComplete.replayBtn}</span>
             </button>
             <button
               id="btn-modal-levels"
@@ -110,7 +116,7 @@ export const LevelCompleteModal: React.FC<LevelCompleteModalProps> = ({
               className="h-12 rounded-2xl font-bold text-sm flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-sky-300 hover:text-white border border-slate-700 active:scale-95 transition-all cursor-pointer"
             >
               <Grid className="w-4 h-4" />
-              <span>关卡选择</span>
+              <span>{t.levelComplete.levelSelectBtn}</span>
             </button>
             <button
               id="btn-modal-home"
@@ -118,7 +124,7 @@ export const LevelCompleteModal: React.FC<LevelCompleteModalProps> = ({
               className="h-12 rounded-2xl font-bold text-sm flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 active:scale-95 transition-all cursor-pointer"
             >
               <Home className="w-4 h-4" />
-              <span>主页</span>
+              <span>{t.levelComplete.homeBtn}</span>
             </button>
           </div>
         </div>

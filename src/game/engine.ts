@@ -20,6 +20,7 @@ import {
   PlayerSyncPayload,
   WorldSyncPayload,
 } from '../types';
+import { getCurrentTranslations, getCurrentLanguage } from '../i18n/LanguageContext';
 
 export interface GameEngineCallbacks {
   onStateUpdate?: (state: {
@@ -571,12 +572,13 @@ export class GameEngine {
   public applyRemotePlayerDeath(payload: DeathSyncPayload) {
     if (!payload) return;
     soundManager.playPlayerDeath();
+    const t = getCurrentTranslations();
     this.lives = Math.max(0, payload.remainingLives);
     this.deathBanner = {
-      title: '💥 队友倒下 / PLAYER DOWN!',
+      title: t.inGame.playerDownTitle,
       subtitle: this.activeCheckpoint
-        ? '正在返回最近的 Checkpoint 重新整备...'
-        : '正在重新整备，双人同心，再接再厉！',
+        ? t.inGame.respawnCheckpoint
+        : t.inGame.respawnInitial,
       timer: 90,
     };
 
@@ -1165,7 +1167,13 @@ export class GameEngine {
         if (this.players.james.y > 540) {
           this.l11RescueWaitTimer++;
           if (this.l11RescueWaitTimer === 120) {
-            this.triggerBanter('James！你还不上来吗？', '等等等等！', undefined, 80);
+            const isZh = getCurrentLanguage() === 'zh';
+            this.triggerBanter(
+              isZh ? 'James！你还不上来吗？' : "James! Aren't you coming up?",
+              isZh ? '等等等等！' : 'Wait wait wait!',
+              undefined,
+              80
+            );
           }
         } else if (this.players.james.y <= 460 && this.l11RescueWaitTimer > 60) {
           this.triggerBanter('Finally!', 'Thanks Xinyi!', undefined, 60);
@@ -1201,7 +1209,14 @@ export class GameEngine {
       if (redFinal?.isPressed && blueFinal?.isPressed && finalTransport && !this.l11FinalLaunched) {
         this.l11FinalCountdown++;
         const sec = Math.max(1, 5 - Math.floor(this.l11FinalCountdown / 60));
-        this.triggerBanter('快上来！', '我站好了！', `🚠 TRANSPORT DEPARTING IN ${sec}...`, 30, sec);
+        const isZh = getCurrentLanguage() === 'zh';
+        this.triggerBanter(
+          isZh ? '快上来！' : 'Hop on quick!',
+          isZh ? '我站好了！' : "I'm in position!",
+          `🚠 TRANSPORT DEPARTING IN ${sec}...`,
+          30,
+          sec
+        );
         if (this.l11FinalCountdown >= 300) {
           this.l11FinalLaunched = true;
           finalTransport.isUnlocked = true;
@@ -1225,7 +1240,13 @@ export class GameEngine {
         if ((redRun?.isPressed || blueRun?.isPressed) && !(redRun?.isPressed && blueRun?.isPressed)) {
           if (this.l12RunTimer <= 0) {
             this.l12RunTimer = 180; // 3 seconds
-            this.triggerBanter('快踩你的开关！', '跑跑跑！', '🏃 SYNCHRONIZED RUN: STEP WITHIN 3.0s!', 45);
+            const isZh = getCurrentLanguage() === 'zh';
+            this.triggerBanter(
+              isZh ? '快踩你的开关！' : 'Step on your switch!',
+              isZh ? '跑跑跑！' : 'Run run run!',
+              '🏃 SYNCHRONIZED RUN: STEP WITHIN 3.0s!',
+              45
+            );
           } else {
             this.l12RunTimer--;
             if (redRun) redRun.countdownTimer = Math.round((this.l12RunTimer / 60) * 1000);
@@ -1252,7 +1273,13 @@ export class GameEngine {
         if ((redFinal12?.isPressed || blueFinal12?.isPressed) && !(redFinal12?.isPressed && blueFinal12?.isPressed)) {
           if (this.l12FinalTimer <= 0) {
             this.l12FinalTimer = 480; // 8s
-            this.triggerBanter('我踩到了！', '我这就过去！', '🔴 SWITCH 1 READY — 8.0s COUNTDOWN', 60);
+            const isZh = getCurrentLanguage() === 'zh';
+            this.triggerBanter(
+              isZh ? '我踩到了！' : 'I stepped on mine!',
+              isZh ? '我这就过去！' : 'Heading over now!',
+              '🔴 SWITCH 1 READY — 8.0s COUNTDOWN',
+              60
+            );
           } else {
             this.l12FinalTimer--;
             const remSec = (this.l12FinalTimer / 60).toFixed(1);
@@ -1302,7 +1329,13 @@ export class GameEngine {
         if (jamesOn && xinyiOn) {
           coopElev.isUnlocked = true;
           if (coopElev.progress < 0.1) {
-            this.triggerBanter('站稳了！', '出发！', '⚡ DUAL SENSOR DETECTED: ASCENDING', 60);
+            const isZh = getCurrentLanguage() === 'zh';
+            this.triggerBanter(
+              isZh ? '站稳了！' : 'Hold steady!',
+              isZh ? '出发！' : "Let's go!",
+              '⚡ DUAL SENSOR DETECTED: ASCENDING',
+              60
+            );
           }
         }
       }
@@ -1347,7 +1380,13 @@ export class GameEngine {
           mirrorRecv.charge = Math.min(100, mirrorRecv.charge + 5);
           if (mirrorRecv.charge >= 100 && virtMirrorBtn && !virtMirrorBtn.isPressed) {
             virtMirrorBtn.isPressed = true;
-            this.triggerBanter('光束对准了！', '传感器已充能！', '✨ OPTICAL FLUX REACHED 100%', 60);
+            const isZh = getCurrentLanguage() === 'zh';
+            this.triggerBanter(
+              isZh ? '光束对准了！' : 'Beam aligned!',
+              isZh ? '传感器已充能！' : 'Sensor fully charged!',
+              '✨ OPTICAL FLUX REACHED 100%',
+              60
+            );
           }
         }
       } else {
@@ -1386,7 +1425,13 @@ export class GameEngine {
             steerRecv.charge = Math.min(100, steerRecv.charge + 5);
             if (steerRecv.charge >= 100 && virtCtrlBtn && !virtCtrlBtn.isPressed) {
               virtCtrlBtn.isPressed = true;
-              this.triggerBanter('转向成功！', '通道打开了！', '🔵 BLUE FLUX TARGET ACTIVATED', 60);
+              const isZh = getCurrentLanguage() === 'zh';
+              this.triggerBanter(
+                isZh ? '转向成功！' : 'Steering successful!',
+                isZh ? '通道打开了！' : 'Path unlocked!',
+                '🔵 BLUE FLUX TARGET ACTIVATED',
+                60
+              );
             }
           }
         } else {
@@ -1430,7 +1475,13 @@ export class GameEngine {
         if (timedSprintBtn.isPressed) {
           if (this.l15TimedSprintTimer <= 0) {
             this.l15TimedSprintTimer = 480; // 8.0 seconds (~480 frames)
-            this.triggerBanter('跑跑跑！', '只有8秒时间！', '⏱️ TIMED OVERRIDE: 8.0s COUNTDOWN', 60);
+            const isZh = getCurrentLanguage() === 'zh';
+            this.triggerBanter(
+              isZh ? '跑跑跑！' : 'Run run run!',
+              isZh ? '只有8秒时间！' : 'Only 8 seconds left!',
+              '⏱️ TIMED OVERRIDE: 8.0s COUNTDOWN',
+              60
+            );
           }
         }
         if (this.l15TimedSprintTimer > 0) {
@@ -1445,7 +1496,13 @@ export class GameEngine {
             timedSprintBtn.isPressed = false;
             timedSprintBtn.countdownTimer = 0;
             if (timedBridge) timedBridge.openProgress = 0;
-            this.triggerBanter('时间到了！', '机关复位！', '⚠️ RELAY EXPIRED: RESETTING', 60);
+            const isZh = getCurrentLanguage() === 'zh';
+            this.triggerBanter(
+              isZh ? '时间到了！' : "Time's up!",
+              isZh ? '机关复位！' : 'Mechanism reset!',
+              '⚠️ RELAY EXPIRED: RESETTING',
+              60
+            );
           }
         }
       }
@@ -1495,7 +1552,13 @@ export class GameEngine {
         this.spawnTeleportBurst(this.players.xinyi.x + 19, this.players.xinyi.y + 19, '#38bdf8');
         this.spawnTeleportBurst(this.players.james.x + 19, this.players.james.y + 19, '#fb923c');
 
-        this.triggerBanter('哇！我们在哪？！', '位置调换了！', '🌀 QUANTUM DISPLACEMENT COMPLETE!', 90);
+        const isZh = getCurrentLanguage() === 'zh';
+        this.triggerBanter(
+          isZh ? '哇！我们在哪？！' : 'Whoa! Where are we?!',
+          isZh ? '位置调换了！' : 'Positions swapped!',
+          '🌀 QUANTUM DISPLACEMENT COMPLETE!',
+          90
+        );
         if (virtSwapBtn) virtSwapBtn.isPressed = true;
         this.l16SwapCooldown = 180; // 3s cooldown so it doesn't loop swap
       }
@@ -1982,12 +2045,13 @@ export class GameEngine {
 
   private handlePlayerDeath(p: PlayerState) {
     soundManager.playPlayerDeath();
+    const t = getCurrentTranslations();
     this.lives = Math.max(0, this.lives - 1);
     this.deathBanner = {
-      title: '💥 队友倒下 / PLAYER DOWN!',
+      title: t.inGame.playerDownTitle,
       subtitle: this.activeCheckpoint
-        ? '正在返回最近的 Checkpoint 重新整备...'
-        : '正在重新整备，双人同心，再接再厉！',
+        ? t.inGame.respawnCheckpoint
+        : t.inGame.respawnInitial,
       timer: 90,
     };
 

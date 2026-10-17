@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { RotateCcw, Home, Smartphone, Settings, HelpCircle, Users, Grid, Volume2, VolumeX } from 'lucide-react';
 import { GameMode, PlayerId, PlayerState } from '../types';
 import { soundManager, SoundSettings } from '../services/soundManager';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface GameHeaderProps {
   xinyi?: PlayerState | null;
@@ -9,6 +10,7 @@ interface GameHeaderProps {
   lumi?: PlayerState | null;
   flare?: PlayerState | null;
   levelTitle: string;
+  currentLevelId?: number;
   gameMode?: GameMode;
   onlineRole?: PlayerId | 'lumi' | 'flare';
   roomCode?: string;
@@ -30,6 +32,7 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
   lumi,
   flare,
   levelTitle,
+  currentLevelId,
   gameMode = 'local' as GameMode,
   onlineRole = 'xinyi' as PlayerId,
   roomCode,
@@ -44,6 +47,7 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
   onToggleHelp,
   onOpenSettings,
 }) => {
+  const { t } = useLanguage();
   const p1 = xinyi || lumi;
   const p2 = james || flare;
 
@@ -61,6 +65,10 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
 
   const isMyRoleP1 = onlineRole === 'xinyi' || (onlineRole as string) === 'lumi';
   const isMyRoleP2 = onlineRole === 'james' || (onlineRole as string) === 'flare';
+
+  // Dynamic localized level title
+  const activeLevelMeta = currentLevelId ? t.levels.find((l) => l.id === currentLevelId) : null;
+  const displayTitle = activeLevelMeta ? activeLevelMeta.title : levelTitle;
 
   return (
     <header className="w-full bg-slate-900/90 backdrop-blur-md border-b border-slate-700/60 px-3 sm:px-6 py-2.5 text-white flex items-center justify-between select-none shadow-md z-20">
@@ -81,7 +89,7 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
               </span>
               {gameMode === 'online' && isMyRoleP1 && (
                 <span className="text-[9px] font-black px-1.5 py-0.2 rounded-full bg-sky-500 text-white">
-                  YOU
+                  {t.header.youBadge}
                 </span>
               )}
             </div>
@@ -91,7 +99,7 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
           </div>
           {p1?.isInExit && (
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 animate-pulse ml-1">
-              终点!
+              {t.header.reachedExit}
             </span>
           )}
         </div>
@@ -102,15 +110,15 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
         <button
           id="btn-header-level-select"
           onClick={onOpenLevelSelect}
-          title="点击选择关卡 (Click to select level)"
+          title={t.header.levelSelectTip}
           className="px-3.5 py-1.5 rounded-xl bg-slate-800/95 hover:bg-slate-700 border border-slate-700 hover:border-amber-400/60 shadow-inner flex items-center gap-2 cursor-pointer transition-all active:scale-95 group"
         >
           <Grid className="w-3.5 h-3.5 text-amber-400 group-hover:rotate-45 transition-transform" />
           <span className="font-black text-xs sm:text-sm tracking-wider text-amber-400">
-            {levelTitle}
+            {displayTitle}
           </span>
           <span className="text-[10px] text-slate-400 font-medium hidden sm:inline group-hover:text-slate-200">
-            ▼ 选关
+            {t.header.selectLevelPrompt}
           </span>
           {gameMode === 'online' && roomCode && (
             <span className="text-[10px] sm:text-xs font-mono font-bold text-sky-400 border-l border-slate-700 pl-2 flex items-center gap-1">
@@ -154,7 +162,7 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
               </span>
               {gameMode === 'online' && isMyRoleP2 && (
                 <span className="text-[9px] font-black px-1.5 py-0.2 rounded-full bg-orange-500 text-white">
-                  YOU
+                  {t.header.youBadge}
                 </span>
               )}
             </div>
@@ -164,7 +172,7 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
           </div>
           {p2?.isInExit && (
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 animate-pulse ml-1">
-              终点!
+              {t.header.reachedExit}
             </span>
           )}
         </div>
@@ -175,18 +183,18 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
           <button
             id="btn-restart-level"
             onClick={onRestart}
-            title="重新开始 (Restart)"
+            title={t.header.restartTip}
             className="h-10 sm:h-12 px-2.5 sm:px-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-amber-300 hover:text-amber-200 border border-amber-500/30 flex items-center gap-1 text-xs font-bold transition-all shadow-sm cursor-pointer"
           >
             <RotateCcw className="w-4 h-4 text-amber-400" />
-            <span className="hidden md:inline">重开</span>
+            <span className="hidden md:inline">{t.header.restartBtn}</span>
           </button>
 
           {/* Quick Sound Toggle Button */}
           <button
             id="btn-toggle-sound"
             onClick={() => soundManager.toggleMute()}
-            title={soundSettings.muted ? '静音中 (点击恢复声音 / Unmute)' : '声音正常 (点击静音 / Mute)'}
+            title={soundSettings.muted ? t.header.soundMuted : t.header.soundNormal}
             className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl border flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
               soundSettings.muted
                 ? 'bg-rose-500/20 text-rose-400 border-rose-500/40 hover:bg-rose-500/30'
@@ -204,7 +212,7 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
           <button
             id="btn-open-settings"
             onClick={onOpenSettings}
-            title="设置 (Settings)"
+            title={t.header.settingsTip}
             className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 hover:text-white border border-slate-700 flex items-center justify-center transition-all shadow-sm cursor-pointer"
           >
             <Settings className="w-4 h-4 sm:w-5 sm:h-5 text-slate-300" />
@@ -214,7 +222,7 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
           <button
             id="btn-toggle-touch"
             onClick={onToggleTouchControls}
-            title="切换触控按键"
+            title={t.header.touchControlsTip}
             className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl border flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
               showTouchControls
                 ? 'bg-sky-500/20 text-sky-400 border-sky-500/50 shadow-sm shadow-sky-500/20'
@@ -228,7 +236,7 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
           <button
             id="btn-help"
             onClick={onToggleHelp}
-            title="按键说明"
+            title={t.header.helpTip}
             className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 flex items-center justify-center transition-all cursor-pointer active:scale-95"
           >
             <HelpCircle className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -238,7 +246,7 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
           <button
             id="btn-return-home"
             onClick={onHome}
-            title="返回首页"
+            title={t.header.homeTip}
             className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 hover:text-white border border-slate-700 flex items-center justify-center transition-all cursor-pointer"
           >
             <Home className="w-4 h-4 sm:w-5 sm:h-5" />

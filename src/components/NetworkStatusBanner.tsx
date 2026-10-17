@@ -1,6 +1,7 @@
 import React from 'react';
 import { Wifi, WifiOff, AlertTriangle, RefreshCw } from 'lucide-react';
 import { ConnectionStatus } from '../types';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface NetworkStatusBannerProps {
   status: ConnectionStatus;
@@ -19,6 +20,8 @@ export const NetworkStatusBanner: React.FC<NetworkStatusBannerProps> = ({
   onDismissTeammateAlert,
   onReconnect,
 }) => {
+  const { t } = useLanguage();
+
   return (
     <>
       {/* Top Network Status Pill */}
@@ -38,7 +41,7 @@ export const NetworkStatusBanner: React.FC<NetworkStatusBannerProps> = ({
             <>
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping opacity-75" />
               <Wifi className="w-3.5 h-3.5" />
-              <span>已连接</span>
+              <span>{t.network.connected}</span>
               {typeof pingMs === 'number' && (
                 <span
                   className={`text-[11px] px-1.5 py-0.5 rounded font-mono ${
@@ -57,25 +60,25 @@ export const NetworkStatusBanner: React.FC<NetworkStatusBannerProps> = ({
           {status === 'connecting' && (
             <>
               <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-              <span>连接中 (Connecting…)</span>
+              <span>{t.network.connecting}</span>
             </>
           )}
           {status === 'reconnecting' && (
             <>
               <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-              <span>重新连接中 (Reconnecting…)</span>
+              <span>{t.network.reconnecting}</span>
             </>
           )}
           {status === 'disconnected' && (
             <>
               <WifiOff className="w-3.5 h-3.5" />
-              <span>连接断开 (Connection Lost)</span>
+              <span>{t.network.disconnected}</span>
               {onReconnect && (
                 <button
                   onClick={onReconnect}
                   className="ml-1 underline text-xs hover:text-rose-700 cursor-pointer"
                 >
-                  重试
+                  {t.network.retry}
                 </button>
               )}
             </>
@@ -93,15 +96,13 @@ export const NetworkStatusBanner: React.FC<NetworkStatusBannerProps> = ({
 
             <div className="space-y-1">
               <h3 className="text-xl font-black text-slate-800 dark:text-slate-100">
-                队友已断开连接
+                {t.network.teammateDisconnectedTitle}
               </h3>
               <p className="text-sm font-semibold text-amber-600 dark:text-amber-400">
-                Teammate Disconnected
+                {t.network.teammateDisconnectedSub}
               </p>
               <p className="text-xs text-slate-500 dark:text-slate-400 pt-1">
-                {teammateMessage || '对方暂时掉线，当前关卡进度已保留。'}
-                <br />
-                对方重新输入房间号加入后可自动恢复同步！
+                {teammateMessage || t.network.teammateDisconnectedDesc}
               </p>
             </div>
 
@@ -111,7 +112,7 @@ export const NetworkStatusBanner: React.FC<NetworkStatusBannerProps> = ({
                 onClick={onDismissTeammateAlert}
                 className="w-full sm:w-auto h-12 px-6 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-white font-bold text-sm shadow-md transition-all active:scale-95 cursor-pointer"
               >
-                留在房间等待
+                {t.network.stayInRoomBtn}
               </button>
             </div>
           </div>

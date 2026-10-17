@@ -11,6 +11,7 @@ import { GameOverModal } from './GameOverModal';
 import { NetworkStatusBanner } from './NetworkStatusBanner';
 import { socketService } from '../services/socketService';
 import { LEVEL_METADATA_LIST } from '../levels';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface GameCanvasProps {
   onReturnHome: () => void;
@@ -33,6 +34,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   onUpdateUnlockedLevel,
   onLevelChanged,
 }) => {
+  const { t } = useLanguage();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const engineRef = useRef<GameEngine | null>(null);
 
@@ -340,7 +342,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
       unsubTeammateDisconnect = socketService.subscribeTeammateDisconnect((data) => {
         setTeammateDisconnected(true);
-        setTeammateDisconnectMsg(data.message || '对方连接已中断 (Teammate Disconnected)');
+        setTeammateDisconnectMsg(data.message || t.network.teammateDisconnectedDesc);
       });
     }
 

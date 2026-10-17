@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { X, RotateCcw, Smartphone, Volume2, VolumeX, Music, Zap, Sparkles } from 'lucide-react';
+import { X, RotateCcw, Smartphone, Volume2, VolumeX, Music, Zap, Sparkles, Globe } from 'lucide-react';
 import { soundManager, SoundSettings } from '../services/soundManager';
+import { useLanguage } from '../i18n/LanguageContext';
+import { LanguageSelector } from './LanguageSelector';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -17,6 +19,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onToggleTouchControls,
   onRestart,
 }) => {
+  const { t } = useLanguage();
   const [audioSettings, setAudioSettings] = useState<SoundSettings>(() => soundManager.getSettings());
 
   useEffect(() => {
@@ -35,7 +38,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           id="btn-settings-close"
           onClick={onClose}
           className="absolute top-4 right-4 w-12 h-12 rounded-2xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 hover:text-white flex items-center justify-center border border-slate-700 transition-all cursor-pointer"
-          aria-label="关闭设置"
+          aria-label={t.settings.saveAndReturnBtn}
         >
           <X className="w-6 h-6" />
         </button>
@@ -46,15 +49,29 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             <Sparkles className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h2 className="text-xl font-black tracking-wide text-white">游戏与声音设置</h2>
-            <p className="text-xs text-slate-400">Twin Quest 音乐、音效与操作选项</p>
+            <h2 className="text-xl font-black tracking-wide text-white">{t.settings.modalTitle}</h2>
+            <p className="text-xs text-slate-400">{t.settings.modalSubtitle}</p>
           </div>
+        </div>
+
+        {/* Language Selection Row */}
+        <div className="mb-5 p-3.5 rounded-2xl bg-slate-800/90 border border-slate-700 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-blue-500/20 text-blue-400">
+              <Globe className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-sm font-bold text-slate-100">{t.settings.languageOptionTitle}</div>
+              <div className="text-xs text-slate-400">{t.settings.languageOptionDesc}</div>
+            </div>
+          </div>
+          <LanguageSelector compact />
         </div>
 
         {/* Audio Controls Section */}
         <div className="mb-5 space-y-3">
           <div className="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">
-            音频控制 / Audio Settings
+            {t.settings.audioTitle}
           </div>
 
           {/* Master Sound Toggle */}
@@ -64,9 +81,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 {audioSettings.muted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
               </div>
               <div>
-                <div className="text-sm font-bold text-slate-100">全局静音 (Master Mute)</div>
+                <div className="text-sm font-bold text-slate-100">{t.settings.masterMute}</div>
                 <div className="text-xs text-slate-400">
-                  {audioSettings.muted ? '所有声音已静音' : '声音正常输出中'}
+                  {audioSettings.muted ? t.settings.masterMuteActive : t.settings.masterMuteInactive}
                 </div>
               </div>
             </div>
@@ -79,7 +96,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50 hover:bg-emerald-500/30'
               }`}
             >
-              {audioSettings.muted ? '已静音' : '开启中'}
+              {audioSettings.muted ? t.settings.mutedStatus : t.settings.unmutedStatus}
             </button>
           </div>
 
@@ -91,8 +108,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   <Music className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="text-sm font-bold text-slate-200">背景音乐 (BGM)</div>
-                  <div className="text-xs text-slate-400">双人探险环境旋律</div>
+                  <div className="text-sm font-bold text-slate-200">{t.settings.bgmTitle}</div>
+                  <div className="text-xs text-slate-400">{t.settings.bgmDesc}</div>
                 </div>
               </div>
               <button
@@ -104,12 +121,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     : 'bg-slate-700 text-slate-400 border-slate-600 hover:text-white'
                 }`}
               >
-                {audioSettings.bgmEnabled ? 'BGM 开启' : 'BGM 关闭'}
+                {audioSettings.bgmEnabled ? t.settings.bgmOn : t.settings.bgmOff}
               </button>
             </div>
             {audioSettings.bgmEnabled && (
               <div className="flex items-center gap-3 pt-1">
-                <span className="text-xs text-slate-400 w-12">音量</span>
+                <span className="text-xs text-slate-400 w-12">{t.settings.volumeLabel}</span>
                 <input
                   id="slider-bgm-volume"
                   type="range"
@@ -135,8 +152,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   <Zap className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="text-sm font-bold text-slate-200">动作音效 (SFX)</div>
-                  <div className="text-xs text-slate-400">跳跃、踩机关、吃宝石、过关音效</div>
+                  <div className="text-sm font-bold text-slate-200">{t.settings.sfxTitle}</div>
+                  <div className="text-xs text-slate-400">{t.settings.sfxDesc}</div>
                 </div>
               </div>
               <button
@@ -153,12 +170,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     : 'bg-slate-700 text-slate-400 border-slate-600 hover:text-white'
                 }`}
               >
-                {audioSettings.sfxEnabled ? '音效开启' : '音效关闭'}
+                {audioSettings.sfxEnabled ? t.settings.sfxOn : t.settings.sfxOff}
               </button>
             </div>
             {audioSettings.sfxEnabled && (
               <div className="flex items-center gap-3 pt-1">
-                <span className="text-xs text-slate-400 w-12">音量</span>
+                <span className="text-xs text-slate-400 w-12">{t.settings.volumeLabel}</span>
                 <input
                   id="slider-sfx-volume"
                   type="range"
@@ -183,7 +200,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         {/* General Controls List */}
         <div className="space-y-3 mb-6">
           <div className="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">
-            操作与关卡 / Game Controls
+            {t.settings.controlsTitle}
           </div>
 
           {/* Option 1: Mobile Touch Controls Toggle */}
@@ -191,8 +208,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             <div className="flex items-center gap-3">
               <Smartphone className="w-5 h-5 text-sky-400" />
               <div>
-                <div className="text-sm font-bold text-slate-200">屏幕虚拟按键</div>
-                <div className="text-xs text-slate-400">在手机或平板上显示大尺寸触控按键</div>
+                <div className="text-sm font-bold text-slate-200">{t.settings.touchControlsTitle}</div>
+                <div className="text-xs text-slate-400">{t.settings.touchControlsDesc}</div>
               </div>
             </div>
             <button
@@ -204,7 +221,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   : 'bg-slate-700 text-slate-300 border-slate-600 hover:text-white'
               }`}
             >
-              {showTouchControls ? '已开启' : '已关闭'}
+              {showTouchControls ? t.settings.enabled : t.settings.disabled}
             </button>
           </div>
 
@@ -213,8 +230,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             <div className="flex items-center gap-3">
               <RotateCcw className="w-5 h-5 text-amber-400" />
               <div>
-                <div className="text-sm font-bold text-slate-200">重置当前关卡</div>
-                <div className="text-xs text-slate-400">让 Xinyi 和 James 回到初始出发点</div>
+                <div className="text-sm font-bold text-slate-200">{t.settings.restartLevelTitle}</div>
+                <div className="text-xs text-slate-400">{t.settings.restartLevelDesc}</div>
               </div>
             </div>
             <button
@@ -225,7 +242,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               }}
               className="h-11 px-4 rounded-xl font-bold text-sm bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 transition-all cursor-pointer active:scale-95"
             >
-              立即重置
+              {t.settings.restartNowBtn}
             </button>
           </div>
         </div>
@@ -236,7 +253,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           onClick={onClose}
           className="w-full h-14 rounded-2xl bg-gradient-to-r from-sky-500 to-orange-500 hover:from-sky-400 hover:to-orange-400 active:scale-98 text-white font-bold text-base shadow-lg shadow-sky-950/40 border border-white/20 transition-all cursor-pointer flex items-center justify-center"
         >
-          保存并返回游戏
+          {t.settings.saveAndReturnBtn}
         </button>
       </div>
     </div>

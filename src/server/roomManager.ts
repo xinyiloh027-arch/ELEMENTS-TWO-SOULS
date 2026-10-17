@@ -525,4 +525,24 @@ export class RoomManager {
     }
     this.roomGates.delete(roomCode);
   }
+
+  public getActiveRoomCount(): number {
+    return this.rooms.size;
+  }
+
+  public getRoomsSummary(): Array<{ roomCode: string; levelId: number; playerCount: number; status: string }> {
+    const summary: Array<{ roomCode: string; levelId: number; playerCount: number; status: string }> = [];
+    for (const [code, room] of this.rooms.entries()) {
+      let playerCount = 0;
+      if (room.players.xinyi?.isConnected || room.players.lumi?.isConnected) playerCount++;
+      if (room.players.james?.isConnected || room.players.flare?.isConnected) playerCount++;
+      summary.push({
+        roomCode: code,
+        levelId: room.currentLevel || 1,
+        playerCount,
+        status: room.status || 'waiting',
+      });
+    }
+    return summary;
+  }
 }
