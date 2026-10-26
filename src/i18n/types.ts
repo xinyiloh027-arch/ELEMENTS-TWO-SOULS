@@ -43,6 +43,19 @@ export interface TranslationDictionary {
     coopBadge: string;
   };
 
+  titleScreen: {
+    subtitle: string;
+    subText: string;
+    startGame: string;
+    startGameSub: string;
+    duoBadge: string;
+    p1Name: string;
+    p2Name: string;
+    p1Role: string;
+    p2Role: string;
+    backToTitle: string;
+  };
+
   lobby: {
     badge: string;
     title: string;

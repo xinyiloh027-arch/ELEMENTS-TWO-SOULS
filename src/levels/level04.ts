@@ -71,12 +71,12 @@ export const LEVEL_04: GameLevel = {
       color: '#475569',
       topColor: '#94a3b8',
     },
-    // Lintel above exit gate
+    // Lintel above exit gate (aligned with coop-gate-04 at x: 1145 to eliminate overlapping shelf overhang)
     {
       id: 'gate-roof-04',
-      x: 1120,
+      x: 1145,
       y: 160,
-      width: 70,
+      width: 24,
       height: 22,
       type: 'platform',
       color: '#0f172a',

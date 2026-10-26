@@ -381,7 +381,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   const levelTitle = currentMeta ? currentMeta.title : `LEVEL ${currentLevelId < 10 ? '0' + currentLevelId : currentLevelId}`;
 
   return (
-    <div className="relative w-screen h-screen bg-slate-950 flex flex-col overflow-hidden select-none">
+    <div className="relative w-screen h-screen bg-[#fbf6ee] flex flex-col overflow-hidden select-none">
       {/* Online Network Health Banner */}
       {gameMode === 'online' && (
         <NetworkStatusBanner
@@ -417,11 +417,11 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       />
 
       {/* Main Game Stage - Centered & Responsive 16:9 Canvas */}
-      <main className="relative flex-1 w-full h-full flex items-center justify-center p-1 sm:p-4 bg-radial from-slate-900 to-slate-950 overflow-hidden">
-        <div className="relative w-full h-full max-w-[1280px] max-h-[720px] aspect-[16/9] flex items-center justify-center shadow-2xl rounded-2xl overflow-hidden border border-slate-800 bg-slate-900">
+      <main className="relative flex-1 w-full h-full flex items-center justify-center p-2 sm:p-5 bg-storybook-paper overflow-hidden">
+        <div className="relative w-full h-full max-w-[1280px] max-h-[720px] aspect-[16/9] flex items-center justify-center rounded-3xl overflow-hidden border-3 border-[#433422] bg-[#fffdfa] shadow-[0_8px_0_#433422]">
           <canvas
             ref={canvasRef}
-            className="w-full h-full object-contain block bg-sky-200"
+            className="w-full h-full object-contain block bg-[#e0f2fe]"
             style={{ imageRendering: 'pixelated' }}
           />
 

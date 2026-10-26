@@ -38,6 +38,19 @@ export const enTranslations: TranslationDictionary = {
     coopBadge: 'Online',
   },
 
+  titleScreen: {
+    subtitle: 'Two Souls Awakening the Celestial Light',
+    subText: 'Where Fire meets Water, a journey through the skies begins',
+    startGame: 'START GAME',
+    startGameSub: 'ENTER THE REALM',
+    duoBadge: 'KINDRED SPIRITS',
+    p1Name: 'Xinyi',
+    p2Name: 'James',
+    p1Role: 'Water Spirit · Purity & Flow',
+    p2Role: 'Fire Spirit · Warmth & Courage',
+    backToTitle: 'Title Screen',
+  },
+
   lobby: {
     badge: 'Online Co-op',
     title: 'Co-op Adventure Room',

@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { TitleScreen } from './components/TitleScreen';
 import { HomeScreen } from './components/HomeScreen';
 import { GameCanvas } from './components/GameCanvas';
 import { OnlineLobbyView } from './components/OnlineLobbyView';
@@ -8,7 +9,7 @@ import { socketService } from './services/socketService';
 import { LanguageProvider } from './i18n/LanguageContext';
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'online-lobby' | 'game'>('home');
+  const [currentView, setCurrentView] = useState<'title' | 'home' | 'online-lobby' | 'game'>('title');
   const [gameMode, setGameMode] = useState<GameMode>('local');
   const [onlineRole, setOnlineRole] = useState<PlayerId>('xinyi');
   const [roomCode, setRoomCode] = useState<string>('');
@@ -93,13 +94,18 @@ export default function App() {
 
   return (
     <LanguageProvider>
-      <div className="w-full h-full min-h-screen bg-slate-950 font-sans text-slate-100">
+      <div className="w-full h-full min-h-screen bg-[#fbf6ee] font-sans text-[#3a2d24]">
+        {currentView === 'title' && (
+          <TitleScreen onStartGame={() => setCurrentView('home')} />
+        )}
+
         {currentView === 'home' && (
           <>
             <HomeScreen
               onStartLocalGame={handleStartLocalGame}
               onOpenOnlineLobby={handleOpenOnlineLobby}
               onOpenLevelSelect={() => setShowHomeLevelSelect(true)}
+              onReturnToTitle={() => setCurrentView('title')}
               unlockedLevel={unlockedLevel}
             />
             {showHomeLevelSelect && (

@@ -330,11 +330,27 @@ export function updatePlayerPhysics(
   // Horizontal collision with static/moving platforms
   for (const plat of colliders) {
     if (checkAABB(p.x, p.y, p.width, p.height, plat.x, plat.y, plat.width, plat.height)) {
-      if (p.vx > 0) {
+      const playerCenterX = p.x + p.width / 2;
+      const platCenterX = plat.x + plat.width / 2;
+
+      if (plat.id === gate.id) {
+        // Closed gate is strictly impassable: players in front of gate always remain on entrance side
+        if (playerCenterX < platCenterX) {
+          p.x = plat.x - p.width;
+        } else {
+          p.x = plat.x + plat.width;
+        }
+        p.vx = 0;
+      } else if (p.vx > 0) {
         p.x = plat.x - p.width;
         p.vx = 0;
       } else if (p.vx < 0) {
-        p.x = plat.x + plat.width;
+        // Prevent snapping to the far right side if player is on the left side of the platform
+        if (p.x < plat.x) {
+          p.x = plat.x - p.width;
+        } else {
+          p.x = plat.x + plat.width;
+        }
         p.vx = 0;
       }
     }
@@ -382,6 +398,7 @@ export function updatePlayerPhysics(
   p.isGrounded = false;
 
   for (const plat of colliders) {
+    if (plat.id === gate.id) continue; // Closed gate barrier is a vertical pillar, not a ceiling or floor
     if (checkAABB(p.x, p.y, p.width, p.height, plat.x, plat.y, plat.width, plat.height)) {
       if (p.vy > 0) {
         // Landing on surface

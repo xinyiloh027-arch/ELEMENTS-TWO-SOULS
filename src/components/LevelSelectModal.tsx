@@ -1,7 +1,9 @@
 import React from 'react';
-import { X, Lock, CheckCircle2, Play, Sparkles } from 'lucide-react';
+import { X, Lock, CheckCircle2, Sparkles } from 'lucide-react';
 import { LEVEL_METADATA_LIST } from '../levels';
 import { useLanguage } from '../i18n/LanguageContext';
+import { playUISound } from '../services/audioService';
+import { triggerSparkleEffect } from '../services/sparkleEffect';
 
 interface LevelSelectModalProps {
   currentLevelId: number;
@@ -19,37 +21,41 @@ export const LevelSelectModal: React.FC<LevelSelectModalProps> = ({
   const { t, language } = useLanguage();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200 select-none">
-      <div className="relative w-full max-w-3xl bg-slate-900 border-2 border-slate-700/80 rounded-3xl p-5 sm:p-7 text-white shadow-2xl flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200 select-none">
+      <div className="card-fantasy relative w-full max-w-3xl rounded-3xl p-5 sm:p-7 text-[#1e293b] shadow-2xl flex flex-col max-h-[92vh] border border-white/80">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div className="flex items-center justify-between pb-4 border-b border-slate-200/80">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-500 to-orange-500 flex items-center justify-center shadow-md">
-              <Sparkles className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-2xl bg-amber-100 border border-amber-300 flex items-center justify-center shadow-xs">
+              <Sparkles className="w-5 h-5 text-amber-600" />
             </div>
             <div>
-              <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white flex items-center gap-2">
+              <h2 className="text-xl sm:text-2xl font-black tracking-tight text-[#0f172a] flex items-center gap-2">
                 <span>{t.levelSelect.modalTitle}</span>
-                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-sky-100 text-[#0369a1] border border-sky-300">
                   {t.levelSelect.modalBadge}
                 </span>
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-[#64748b] font-bold">
                 {t.levelSelect.modalSubtitle} {Math.min(unlockedLevel, 20)} / 20
               </p>
             </div>
           </div>
 
           <button
-            onClick={onClose}
-            className="w-10 h-10 rounded-2xl bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition-colors cursor-pointer border border-slate-700"
+            onClick={(e) => {
+              playUISound('back');
+              triggerSparkleEffect(e);
+              onClose();
+            }}
+            className="btn-fantasy-utility w-10 h-10 rounded-2xl flex items-center justify-center cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5 text-[#475569]" />
           </button>
         </div>
 
-        {/* Level Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 overflow-y-auto py-4 pr-1">
+        {/* Level Cards Grid (Levels 1 through 20) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 overflow-y-auto py-4 pr-1">
           {LEVEL_METADATA_LIST.map((meta) => {
             const isUnlocked = meta.id <= unlockedLevel;
             const isCurrent = meta.id === currentLevelId;
@@ -59,34 +65,40 @@ export const LevelSelectModal: React.FC<LevelSelectModalProps> = ({
             return (
               <div
                 key={meta.id}
-                onClick={() => {
+                onClick={(e) => {
                   if (isUnlocked) {
+                    playUISound('click');
+                    triggerSparkleEffect(e);
                     onSelectLevel(meta.id);
                   }
                 }}
-                className={`relative group rounded-2xl p-4 border transition-all select-none flex items-center justify-between ${
+                className={`relative group rounded-2xl p-3.5 border transition-all select-none flex items-center justify-between ${
                   !isUnlocked
-                    ? 'bg-slate-900/50 border-slate-800/60 opacity-60 cursor-not-allowed'
+                    ? 'bg-slate-100/50 border-slate-200/50 opacity-60 cursor-not-allowed'
                     : isCurrent
-                    ? 'bg-slate-800/95 border-sky-400 shadow-lg shadow-sky-500/10 cursor-pointer ring-2 ring-sky-500/30'
-                    : 'bg-slate-800/60 hover:bg-slate-800 border-slate-700/80 hover:border-slate-500 cursor-pointer active:scale-98'
+                    ? 'bg-sky-100/95 border-2 border-sky-400 shadow-[0_4px_16px_rgba(56,189,248,0.3)] ring-2 ring-sky-300 cursor-pointer'
+                    : isCompleted
+                    ? 'bg-white/90 hover:bg-emerald-50/90 border-emerald-300/80 shadow-sm hover:shadow-md cursor-pointer active:translate-y-0.5'
+                    : 'bg-white/85 hover:bg-white border-slate-200 shadow-sm hover:shadow-md cursor-pointer active:translate-y-0.5'
                 }`}
               >
-                <div className="flex items-center gap-3.5">
+                <div className="flex items-center gap-3">
                   {/* Level Number Badge */}
                   <div
-                    className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-base shrink-0 border ${
+                    className={`w-11 h-11 rounded-xl flex items-center justify-center font-black text-sm shrink-0 border ${
                       isUnlocked
                         ? isCurrent
-                          ? 'bg-gradient-to-tr from-sky-500 to-teal-400 text-white border-sky-300 shadow-sm'
-                          : 'bg-slate-700 text-slate-200 border-slate-600'
-                        : 'bg-slate-800 text-slate-500 border-slate-800'
+                          ? 'bg-[#0284c7] text-white border-sky-300 shadow-sm'
+                          : isCompleted
+                          ? 'bg-emerald-500 text-white border-emerald-400'
+                          : 'bg-white text-[#1e293b] border-slate-200'
+                        : 'bg-slate-200 text-[#94a3b8] border-slate-300'
                     }`}
                   >
                     {isUnlocked ? (
                       meta.id < 10 ? `0${meta.id}` : `${meta.id}`
                     ) : (
-                      <Lock className="w-5 h-5 text-slate-500" />
+                      <Lock className="w-4 h-4 text-[#94a3b8]" />
                     )}
                   </div>
 
@@ -95,69 +107,42 @@ export const LevelSelectModal: React.FC<LevelSelectModalProps> = ({
                     <div className="flex items-center gap-2">
                       <span
                         className={`font-black text-sm tracking-wide ${
-                          isCurrent ? 'text-sky-400' : 'text-slate-200'
+                          isCurrent ? 'text-[#0369a1]' : 'text-[#0f172a]'
                         }`}
                       >
                         {i18nMeta.title}
                       </span>
                       {isCompleted && (
-                        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-emerald-400">
+                        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-emerald-700">
                           <CheckCircle2 className="w-3.5 h-3.5" />
                           {t.levelSelect.completedBadge}
                         </span>
                       )}
                       {isCurrent && (
-                        <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-md bg-sky-500/20 text-sky-400 border border-sky-500/30">
+                        <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-md bg-sky-200/60 text-[#0369a1] border border-sky-300">
                           {t.levelSelect.currentBadge}
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-slate-400 leading-tight">
+                    <p className="text-xs text-[#64748b] leading-tight">
                       {i18nMeta.desc}
                     </p>
-                    <div className="text-[11px] text-amber-400/90 font-medium pt-0.5">
+                    <div className="text-[11px] text-amber-700 font-bold pt-0.5">
                       {language === 'zh' ? '难度: ' : 'Difficulty: '}
                       {i18nMeta.difficulty}
                     </div>
                   </div>
                 </div>
 
-                {/* Right Action Icon */}
-                <div className="shrink-0 pl-2">
-                  {isUnlocked ? (
-                    <div
-                      className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${
-                        isCurrent
-                          ? 'bg-sky-500 text-white'
-                          : 'bg-slate-700 text-slate-300 group-hover:bg-slate-600 group-hover:text-white'
-                      }`}
-                    >
-                      <Play className="w-4 h-4 fill-current ml-0.5" />
-                    </div>
-                  ) : (
-                    <div className="w-8 h-8 rounded-xl bg-slate-800/80 flex items-center justify-center text-slate-600">
-                      <Lock className="w-4 h-4" />
-                    </div>
-                  )}
-                </div>
+                {/* Right Action Hint */}
+                {isUnlocked && (
+                  <div className="text-xs font-bold text-[#0369a1] px-2 py-1 rounded-lg bg-sky-50 border border-sky-200 shadow-2xs group-hover:scale-105 transition-transform">
+                    ▶
+                  </div>
+                )}
               </div>
             );
           })}
-        </div>
-
-        {/* Footer info */}
-        <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
-          <span>
-            {language === 'zh'
-              ? '提示：两名玩家都到达 EXIT 即可解锁下一关。'
-              : 'Tip: Both players must reach EXIT together to unlock the next level.'}
-          </span>
-          <button
-            onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold cursor-pointer border border-slate-700"
-          >
-            {language === 'zh' ? '关闭' : 'Close'}
-          </button>
         </div>
       </div>
     </div>

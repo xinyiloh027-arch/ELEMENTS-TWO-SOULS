@@ -1,6 +1,8 @@
 import React from 'react';
 import { X, Sparkles, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
+import { playUISound } from '../services/audioService';
+import { triggerSparkleEffect } from '../services/sparkleEffect';
 
 interface HelpModalProps {
   onClose: () => void;
@@ -10,69 +12,119 @@ export const HelpModal: React.FC<HelpModalProps> = ({ onClose }) => {
   const { t } = useLanguage();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="relative w-full max-w-md bg-slate-900 border border-slate-700 rounded-2xl p-6 text-white shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200 select-none">
+      <div className="card-fantasy relative w-full max-w-md p-6 sm:p-7 text-slate-800">
+        {/* Close Button */}
         <button
-          onClick={onClose}
-          className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer"
+          id="btn-help-close"
+          onClick={(e) => {
+            playUISound('back');
+            triggerSparkleEffect(e);
+            onClose();
+          }}
+          className="btn-fantasy-utility absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center cursor-pointer"
         >
-          <X className="w-5 h-5" />
+          <X className="w-5 h-5 text-slate-600" />
         </button>
 
-        <div className="flex items-center gap-2 mb-4">
-          <Sparkles className="w-5 h-5 text-amber-400" />
-          <h3 className="text-xl font-bold">{t.help.title}</h3>
+        {/* Modal Header */}
+        <div className="flex items-center gap-3 mb-4 pb-3 border-b border-sky-100">
+          <div className="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-200/60 flex items-center justify-center shadow-xs">
+            <Sparkles className="w-5 h-5 text-amber-500" />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold tracking-tight text-slate-800">{t.help.title}</h3>
+            <p className="text-xs text-sky-600 font-semibold tracking-wide">ELEMENTS: TWO SOULS</p>
+          </div>
         </div>
 
-        <div className="space-y-4 text-sm text-slate-300">
-          {/* Controls table */}
+        <div className="space-y-3.5 text-sm">
+          {/* Controls Table */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="p-3.5 rounded-2xl bg-sky-950/60 border border-sky-500/40">
-              <div className="font-bold text-sky-400 mb-2 flex items-center gap-1.5">
+            {/* P1 Controls */}
+            <div className="p-3.5 rounded-2xl bg-sky-50/80 border border-sky-200/60 shadow-xs">
+              <div className="font-bold text-sky-700 mb-2 flex items-center gap-1.5 text-xs">
+                <span>💧</span>
                 <span>{t.help.p1Header}</span>
               </div>
-              <ul className="space-y-1.5 text-xs">
-                <li><kbd className="px-2 py-0.5 bg-slate-800 rounded font-mono text-sky-300 border border-sky-500/30">A</kbd> {t.help.moveLeft}</li>
-                <li><kbd className="px-2 py-0.5 bg-slate-800 rounded font-mono text-sky-300 border border-sky-500/30">D</kbd> {t.help.moveRight}</li>
-                <li><kbd className="px-2 py-0.5 bg-slate-800 rounded font-mono text-sky-300 border border-sky-500/30">W</kbd> {t.help.jump}</li>
+              <ul className="space-y-2 text-xs font-medium text-slate-700">
+                <li className="flex items-center justify-between">
+                  <span>{t.help.moveLeft}</span>
+                  <kbd className="px-2 py-0.5 bg-white rounded-md font-mono text-sky-700 border border-sky-200 shadow-xs">A</kbd>
+                </li>
+                <li className="flex items-center justify-between">
+                  <span>{t.help.moveRight}</span>
+                  <kbd className="px-2 py-0.5 bg-white rounded-md font-mono text-sky-700 border border-sky-200 shadow-xs">D</kbd>
+                </li>
+                <li className="flex items-center justify-between">
+                  <span>{t.help.jump}</span>
+                  <kbd className="px-2 py-0.5 bg-white rounded-md font-mono text-sky-700 border border-sky-200 shadow-xs">W</kbd>
+                </li>
               </ul>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-orange-950/60 border border-orange-500/40">
-              <div className="font-bold text-orange-400 mb-2 flex items-center gap-1.5">
+            {/* P2 Controls */}
+            <div className="p-3.5 rounded-2xl bg-amber-50/80 border border-amber-200/60 shadow-xs">
+              <div className="font-bold text-amber-700 mb-2 flex items-center gap-1.5 text-xs">
+                <span>🔥</span>
                 <span>{t.help.p2Header}</span>
               </div>
-              <ul className="space-y-1.5 text-xs">
-                <li><kbd className="px-2 py-0.5 bg-slate-800 rounded font-mono text-orange-300 border border-orange-500/30">←</kbd> {t.help.moveLeft}</li>
-                <li><kbd className="px-2 py-0.5 bg-slate-800 rounded font-mono text-orange-300 border border-orange-500/30">→</kbd> {t.help.moveRight}</li>
-                <li><kbd className="px-2 py-0.5 bg-slate-800 rounded font-mono text-orange-300 border border-orange-500/30">↑</kbd> {t.help.jump}</li>
+              <ul className="space-y-2 text-xs font-medium text-slate-700">
+                <li className="flex items-center justify-between">
+                  <span>{t.help.moveLeft}</span>
+                  <kbd className="px-2 py-0.5 bg-white rounded-md font-mono text-amber-700 border border-amber-200 shadow-xs">←</kbd>
+                </li>
+                <li className="flex items-center justify-between">
+                  <span>{t.help.moveRight}</span>
+                  <kbd className="px-2 py-0.5 bg-white rounded-md font-mono text-amber-700 border border-amber-200 shadow-xs">→</kbd>
+                </li>
+                <li className="flex items-center justify-between">
+                  <span>{t.help.jump}</span>
+                  <kbd className="px-2 py-0.5 bg-white rounded-md font-mono text-amber-700 border border-amber-200 shadow-xs">↑</kbd>
+                </li>
               </ul>
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-slate-800/80 border border-slate-700/80 space-y-2.5">
-            <div className="flex items-start gap-2.5 text-xs">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-              <span><strong>{t.help.switchesRuleTitle}</strong> {t.help.switchesRuleDesc}</span>
+          {/* Gameplay Rules Note */}
+          <div className="p-3.5 rounded-2xl bg-white/70 border border-sky-100/80 shadow-xs space-y-2 text-xs">
+            <div className="flex items-start gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+              <span>
+                <strong className="text-slate-800">{t.help.switchesRuleTitle}</strong>{' '}
+                <span className="text-slate-600">{t.help.switchesRuleDesc}</span>
+              </span>
             </div>
-            <div className="flex items-start gap-2.5 text-xs">
-              <CheckCircle2 className="w-4 h-4 text-sky-400 shrink-0 mt-0.5" />
-              <span><strong>{t.help.exitRuleTitle}</strong> {t.help.exitRuleDesc}</span>
+            <div className="flex items-start gap-2">
+              <CheckCircle2 className="w-4 h-4 text-sky-500 shrink-0 mt-0.5" />
+              <span>
+                <strong className="text-slate-800">{t.help.exitRuleTitle}</strong>{' '}
+                <span className="text-slate-600">{t.help.exitRuleDesc}</span>
+              </span>
             </div>
-            <div className="flex items-start gap-2.5 text-xs">
-              <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-              <span><strong>{t.help.controlsFeelTitle}</strong> {t.help.controlsFeelDesc}</span>
+            <div className="flex items-start gap-2">
+              <CheckCircle2 className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+              <span>
+                <strong className="text-slate-800">{t.help.controlsFeelTitle}</strong>{' '}
+                <span className="text-slate-600">{t.help.controlsFeelDesc}</span>
+              </span>
             </div>
           </div>
         </div>
 
-        <div className="mt-6">
+        {/* Primary Action Button */}
+        <div className="mt-5">
           <button
             id="btn-help-confirm"
-            onClick={onClose}
-            className="w-full h-13 rounded-2xl font-bold bg-gradient-to-r from-sky-500 to-orange-500 hover:from-sky-400 hover:to-orange-400 text-white shadow-lg active:scale-98 transition-all cursor-pointer"
+            onClick={(e) => {
+              playUISound('confirm');
+              triggerSparkleEffect(e);
+              onClose();
+            }}
+            className="btn-fantasy-primary w-full py-3.5 rounded-2xl font-bold text-sm tracking-wide flex items-center justify-center gap-2 cursor-pointer uppercase"
           >
-            {t.help.confirmBtn}
+            <Sparkles className="w-4 h-4" />
+            <span>{t.help.confirmBtn}</span>
           </button>
         </div>
       </div>

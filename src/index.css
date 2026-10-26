@@ -1,5 +1,130 @@
 @import "tailwindcss";
 
+/* Dreamy Fantasy Aesthetic (Sky: Children of the Light Inspiration) */
+:root {
+  --color-sky-light: #e0f2fe;
+  --color-sky-core: #7ec8e3;
+  --color-sky-deep: #0284c7;
+  --color-gold-light: #fef08a;
+  --color-gold-core: #f59e0b;
+  --color-gold-glow: rgba(245, 158, 11, 0.35);
+  --color-lavender-mist: #e9d5ff;
+  --color-ivory: #fffdfa;
+  --color-slate-dark: #0f172a;
+}
+
+/* Dreamy Sky & Mountain Backdrop with Atmospheric Mist */
+.bg-fantasy-sky {
+  background-color: #0b1528;
+  background-image: 
+    radial-gradient(circle at 50% 20%, rgba(254, 240, 138, 0.15) 0%, transparent 60%),
+    linear-gradient(180deg, #0f2b48 0%, #173b5e 35%, #1e4a6d 70%, #0d1e33 100%);
+  background-attachment: fixed;
+}
+
+/* Frosted Glass Panels (Sky: Children of the Light Style) */
+.card-fantasy,
+.card-storybook {
+  background: rgba(255, 253, 250, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1.5px solid rgba(254, 243, 199, 0.6);
+  box-shadow: 
+    0 12px 36px rgba(15, 23, 42, 0.15),
+    0 2px 8px rgba(245, 158, 11, 0.12),
+    inset 0 1px 1px rgba(255, 255, 255, 0.8);
+}
+
+.card-fantasy-dark {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1.5px solid rgba(254, 240, 138, 0.3);
+  box-shadow: 
+    0 16px 40px rgba(0, 0, 0, 0.3),
+    0 0 25px rgba(245, 158, 11, 0.15);
+}
+
+/* Refined Fantasy Buttons */
+.btn-fantasy-primary,
+.btn-handdrawn-primary {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 45%, #fed7aa 100%);
+  color: #1e293b;
+  border: 1.5px solid rgba(245, 158, 11, 0.7);
+  box-shadow: 
+    0 4px 20px rgba(245, 158, 11, 0.35),
+    0 2px 6px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-fantasy-primary:hover,
+.btn-handdrawn-primary:hover {
+  background: linear-gradient(135deg, #ffffff 0%, #fef08a 50%, #fde047 100%);
+  border-color: rgba(217, 119, 6, 0.9);
+  box-shadow: 
+    0 6px 28px rgba(245, 158, 11, 0.5),
+    0 0 15px rgba(254, 240, 138, 0.6);
+  transform: translateY(-1.5px);
+}
+.btn-fantasy-primary:active,
+.btn-handdrawn-primary:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.3);
+}
+
+.btn-fantasy-secondary,
+.btn-handdrawn-secondary {
+  background: linear-gradient(135deg, rgba(224, 242, 254, 0.95) 0%, rgba(186, 230, 253, 0.9) 100%);
+  color: #0369a1;
+  border: 1.5px solid rgba(56, 189, 248, 0.6);
+  box-shadow: 
+    0 4px 18px rgba(56, 189, 248, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-fantasy-secondary:hover,
+.btn-handdrawn-secondary:hover {
+  background: linear-gradient(135deg, #ffffff 0%, #e0f2fe 60%, #bae6fd 100%);
+  border-color: rgba(2, 132, 199, 0.85);
+  box-shadow: 
+    0 6px 24px rgba(56, 189, 248, 0.4),
+    0 0 12px rgba(186, 230, 253, 0.5);
+  transform: translateY(-1.5px);
+}
+.btn-fantasy-secondary:active,
+.btn-handdrawn-secondary:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 8px rgba(56, 189, 248, 0.2);
+}
+
+.btn-fantasy-utility,
+.btn-handdrawn-utility {
+  background: rgba(255, 253, 250, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #1e293b;
+  border: 1.5px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 
+    0 3px 12px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-fantasy-utility:hover,
+.btn-handdrawn-utility:hover {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(245, 158, 11, 0.5);
+  box-shadow: 
+    0 4px 16px rgba(245, 158, 11, 0.2),
+    0 0 8px rgba(254, 240, 138, 0.3);
+  transform: translateY(-1px);
+}
+.btn-fantasy-utility:active,
+.btn-handdrawn-utility:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -12,7 +137,7 @@
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes floatSlow {
@@ -20,10 +145,40 @@
     transform: translateY(0px);
   }
   50% {
-    transform: translateY(-5px);
+    transform: translateY(-6px);
   }
 }
 
 .animate-float-slow {
   animation: floatSlow 4.5s ease-in-out infinite;
+}
+
+@keyframes pulseGently {
+  0%, 100% {
+    opacity: 0.85;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+}
+
+.animate-pulse-gently {
+  animation: pulseGently 3s ease-in-out infinite;
+}
+
+@keyframes sunbeamDrift {
+  0%, 100% {
+    opacity: 0.45;
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    opacity: 0.65;
+    transform: rotate(1.5deg) scale(1.02);
+  }
+}
+
+.animate-sunbeam {
+  animation: sunbeamDrift 8s ease-in-out infinite;
 }

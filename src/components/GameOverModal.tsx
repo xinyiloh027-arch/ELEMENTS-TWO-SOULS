@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
-import { RotateCcw, Home, Skull } from 'lucide-react';
+import { RotateCcw, Home, Sparkles } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
+import { playUISound } from '../services/audioService';
+import { triggerSparkleEffect } from '../services/sparkleEffect';
 
 interface GameOverModalProps {
   currentLevelId: number;
@@ -29,18 +31,18 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
   return (
     <div
       id="game-over-modal"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-in fade-in duration-200 select-none"
     >
-      <div className="relative w-full max-w-md bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border border-red-500/40 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-red-950/60 flex flex-col items-center text-center">
-        {/* Skull badge */}
-        <div className="w-16 h-16 rounded-2xl bg-red-500/20 border border-red-500/40 flex items-center justify-center text-red-400 mb-4 shadow-inner">
-          <Skull className="w-9 h-9" />
+      <div className="card-fantasy relative w-full max-w-md p-6 sm:p-8 flex flex-col items-center text-center">
+        {/* Gentle Encouraging Icon */}
+        <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200/80 flex items-center justify-center text-amber-500 mb-4 shadow-sm">
+          <Sparkles className="w-8 h-8" />
         </div>
 
-        <h2 className="text-2xl sm:text-3xl font-black text-white tracking-wide mb-1">
+        <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 tracking-tight mb-1">
           {t.gameOver.title}
         </h2>
-        <p className="text-sm font-medium text-slate-400 mb-6">
+        <p className="text-xs sm:text-sm font-medium text-slate-500 mb-6">
           {t.gameOver.subtitlePrefix}
           {currentLevelId < 10 ? '0' + currentLevelId : currentLevelId}
           {t.gameOver.subtitleSuffix}
@@ -49,19 +51,27 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
         <div className="w-full flex flex-col gap-3">
           <button
             id="btn-game-over-restart"
-            onClick={onRestart}
-            className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 active:scale-98 text-white font-black text-base shadow-lg shadow-red-900/40 flex items-center justify-center gap-2 cursor-pointer transition-all"
+            onClick={(e) => {
+              playUISound('click');
+              triggerSparkleEffect(e);
+              onRestart();
+            }}
+            className="btn-fantasy-primary w-full py-3.5 px-6 rounded-2xl font-bold text-sm tracking-wide flex items-center justify-center gap-2 cursor-pointer uppercase"
           >
-            <RotateCcw className="w-5 h-5" />
+            <RotateCcw className="w-4 h-4" />
             <span>{t.gameOver.restartBtn}</span>
           </button>
 
           <button
             id="btn-game-over-home"
-            onClick={onHome}
-            className="w-full py-3 px-6 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 active:scale-98 text-slate-300 hover:text-white font-bold text-sm border border-slate-700 flex items-center justify-center gap-2 cursor-pointer transition-all"
+            onClick={(e) => {
+              playUISound('back');
+              triggerSparkleEffect(e);
+              onHome();
+            }}
+            className="btn-fantasy-utility w-full py-3 px-6 rounded-2xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer"
           >
-            <Home className="w-4 h-4" />
+            <Home className="w-4 h-4 text-slate-600" />
             <span>{t.gameOver.homeBtn}</span>
           </button>
         </div>

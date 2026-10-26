@@ -54,60 +54,58 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
     const playerTheme = isXinyi
       ? {
           name: t.touch.controllingP1,
-          border: 'border-sky-400/50',
-          gradient: 'from-sky-500 to-sky-700 active:from-sky-400 active:to-sky-600',
-          jumpGradient: 'from-cyan-400 to-sky-600 active:from-cyan-300 active:to-sky-500',
-          text: 'text-sky-400',
-          dot: 'bg-sky-400 shadow-[0_0_8px_#38bdf8]',
+          bg: 'bg-gradient-to-t from-sky-500 to-sky-400 active:from-sky-600 active:to-sky-500 text-white shadow-md shadow-sky-500/20',
+          jumpBg: 'bg-gradient-to-t from-sky-500 to-teal-400 active:from-sky-600 active:to-teal-500 text-white shadow-md shadow-sky-500/30',
+          textColor: 'text-sky-700',
+          badge: '💧',
         }
       : {
           name: t.touch.controllingP2,
-          border: 'border-orange-400/50',
-          gradient: 'from-orange-500 to-orange-700 active:from-orange-400 active:to-orange-600',
-          jumpGradient: 'from-amber-400 to-orange-600 active:from-amber-300 active:to-orange-500',
-          text: 'text-orange-400',
-          dot: 'bg-orange-400 shadow-[0_0_8px_#fb923c]',
+          bg: 'bg-gradient-to-t from-amber-500 to-orange-400 active:from-amber-600 active:to-orange-500 text-white shadow-md shadow-amber-500/20',
+          jumpBg: 'bg-gradient-to-t from-amber-500 to-rose-400 active:from-amber-600 active:to-rose-500 text-white shadow-md shadow-amber-500/30',
+          textColor: 'text-amber-700',
+          badge: '🔥',
         };
 
     return (
       <div className="pointer-events-none absolute inset-x-0 bottom-4 px-4 sm:px-8 flex justify-between items-end z-30 select-none touch-none">
         {/* Left Thumb: Directional Controls (Left & Right) */}
-        <div className="pointer-events-auto flex flex-col items-start gap-1.5 bg-slate-900/90 backdrop-blur-md p-3 rounded-3xl border shadow-2xl">
-          <div className="flex items-center gap-1.5 text-xs font-black px-1 text-slate-300">
-            <span className={`w-2.5 h-2.5 rounded-full ${playerTheme.dot}`}></span>
-            <span className={playerTheme.text}>{playerTheme.name}</span>
+        <div className="pointer-events-auto flex flex-col items-start gap-1.5 bg-white/80 backdrop-blur-md p-3 rounded-3xl border border-white/80 shadow-lg">
+          <div className="flex items-center gap-1.5 text-xs font-bold px-1">
+            <span>{playerTheme.badge}</span>
+            <span className={playerTheme.textColor}>{playerTheme.name}</span>
           </div>
           <div className="flex items-center gap-3">
             <button
               id="touch-online-left"
               {...createButtonHandlers(assignedPlayer, 'left')}
-              className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-b ${playerTheme.gradient} text-white flex items-center justify-center font-black shadow-lg border active:scale-90 active:translate-y-0.5 transition-transform cursor-pointer`}
+              className={`w-16 h-16 sm:w-18 sm:h-18 rounded-2xl ${playerTheme.bg} border border-white/50 flex items-center justify-center font-bold active:scale-95 transition-all cursor-pointer`}
               aria-label={t.touch.ariaMoveLeft}
             >
-              <ArrowLeft className="w-8 h-8 sm:w-9 sm:h-9" />
+              <ArrowLeft className="w-8 h-8" />
             </button>
             <button
               id="touch-online-right"
               {...createButtonHandlers(assignedPlayer, 'right')}
-              className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-b ${playerTheme.gradient} text-white flex items-center justify-center font-black shadow-lg border active:scale-90 active:translate-y-0.5 transition-transform cursor-pointer`}
+              className={`w-16 h-16 sm:w-18 sm:h-18 rounded-2xl ${playerTheme.bg} border border-white/50 flex items-center justify-center font-bold active:scale-95 transition-all cursor-pointer`}
               aria-label={t.touch.ariaMoveRight}
             >
-              <ArrowRight className="w-8 h-8 sm:w-9 sm:h-9" />
+              <ArrowRight className="w-8 h-8" />
             </button>
           </div>
         </div>
 
-        {/* Right Thumb: Giant Jump Button (Min 64x64) */}
-        <div className="pointer-events-auto flex flex-col items-end gap-1.5 bg-slate-900/90 backdrop-blur-md p-3 rounded-3xl border shadow-2xl">
-          <div className="text-xs font-black px-1 text-slate-400">{t.touch.jump} (JUMP)</div>
+        {/* Right Thumb: Giant Jump Button */}
+        <div className="pointer-events-auto flex flex-col items-end gap-1.5 bg-white/80 backdrop-blur-md p-3 rounded-3xl border border-white/80 shadow-lg">
+          <div className="text-xs font-semibold px-1 text-slate-500">{t.touch.jump}</div>
           <button
             id="touch-online-jump"
             {...createButtonHandlers(assignedPlayer, 'jump')}
-            className={`w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-b ${playerTheme.jumpGradient} text-white flex flex-col items-center justify-center font-black shadow-xl border-2 active:scale-90 active:translate-y-1 transition-transform cursor-pointer`}
+            className={`w-20 h-20 sm:w-22 sm:h-22 rounded-3xl ${playerTheme.jumpBg} border border-white/60 flex flex-col items-center justify-center font-bold active:scale-95 transition-all cursor-pointer`}
             aria-label={t.touch.ariaJump}
           >
             <ArrowUp className="w-9 h-9 sm:w-10 sm:h-10" />
-            <span className="text-xs font-black tracking-wider">JUMP</span>
+            <span className="text-[11px] font-bold tracking-wider uppercase">JUMP</span>
           </button>
         </div>
       </div>
@@ -118,74 +116,72 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-3 px-3 sm:px-6 flex justify-between items-end z-30 select-none touch-none">
       {/* Player 1: Xinyi (Blue) Virtual Controller */}
-      <div className="pointer-events-auto flex flex-col items-center gap-2 bg-slate-900/85 backdrop-blur-md p-3 rounded-2xl border border-sky-500/40 shadow-2xl">
-        <div className="flex items-center gap-1 text-xs font-black text-sky-400">
-          <span className="w-2.5 h-2.5 rounded-full bg-sky-400 shadow-[0_0_8px_#38bdf8]"></span>
+      <div className="pointer-events-auto flex flex-col items-center gap-2 bg-white/85 backdrop-blur-md p-2.5 sm:p-3 rounded-3xl border border-sky-200/80 shadow-lg">
+        <div className="flex items-center gap-1 text-xs font-bold text-sky-700">
+          <span>💧</span>
           <span>Xinyi (P1)</span>
         </div>
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2 sm:gap-2.5">
           <button
             id="touch-xinyi-left"
             {...createButtonHandlers('xinyi', 'left')}
-            className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-b from-sky-500 to-sky-700 active:from-sky-400 active:to-sky-600 text-white flex items-center justify-center font-black shadow-lg shadow-sky-950/50 border border-sky-400/50 active:scale-90 active:translate-y-0.5 transition-transform cursor-pointer"
+            className="w-13 h-13 sm:w-15 sm:h-15 rounded-2xl bg-gradient-to-t from-sky-500 to-sky-400 active:from-sky-600 active:to-sky-500 text-white border border-sky-300 flex items-center justify-center font-bold active:scale-95 transition-all cursor-pointer shadow-sm"
             aria-label={`Xinyi ${t.touch.ariaMoveLeft}`}
           >
-            <ArrowLeft className="w-7 h-7 sm:w-8 sm:h-8" />
+            <ArrowLeft className="w-6 h-6 sm:w-7 sm:h-7" />
           </button>
           <button
             id="touch-xinyi-jump"
             {...createButtonHandlers('xinyi', 'jump')}
-            className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-b from-cyan-400 to-sky-600 active:from-cyan-300 active:to-sky-500 text-white flex items-center justify-center font-black shadow-lg shadow-sky-950/50 border border-cyan-300/60 active:scale-90 active:translate-y-0.5 transition-transform cursor-pointer"
+            className="w-13 h-13 sm:w-15 sm:h-15 rounded-2xl bg-gradient-to-t from-amber-400 to-amber-300 active:from-amber-500 active:to-amber-400 text-amber-950 border border-amber-200 flex items-center justify-center font-bold active:scale-95 transition-all cursor-pointer shadow-sm"
             aria-label={`Xinyi ${t.touch.ariaJump}`}
           >
-            <ArrowUp className="w-7 h-7 sm:w-8 sm:h-8" />
+            <ArrowUp className="w-6 h-6 sm:w-7 sm:h-7" />
           </button>
           <button
             id="touch-xinyi-right"
             {...createButtonHandlers('xinyi', 'right')}
-            className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-b from-sky-500 to-sky-700 active:from-sky-400 active:to-sky-600 text-white flex items-center justify-center font-black shadow-lg shadow-sky-950/50 border border-sky-400/50 active:scale-90 active:translate-y-0.5 transition-transform cursor-pointer"
+            className="w-13 h-13 sm:w-15 sm:h-15 rounded-2xl bg-gradient-to-t from-sky-500 to-sky-400 active:from-sky-600 active:to-sky-500 text-white border border-sky-300 flex items-center justify-center font-bold active:scale-95 transition-all cursor-pointer shadow-sm"
             aria-label={`Xinyi ${t.touch.ariaMoveRight}`}
           >
-            <ArrowRight className="w-7 h-7 sm:w-8 sm:h-8" />
+            <ArrowRight className="w-6 h-6 sm:w-7 sm:h-7" />
           </button>
         </div>
       </div>
 
       {/* Player 2: James (Orange) Virtual Controller */}
-      <div className="pointer-events-auto flex flex-col items-center gap-2 bg-slate-900/85 backdrop-blur-md p-3 rounded-2xl border border-orange-500/40 shadow-2xl">
-        <div className="flex items-center gap-1 text-xs font-black text-orange-400">
-          <span className="w-2.5 h-2.5 rounded-full bg-orange-400 shadow-[0_0_8px_#fb923c]"></span>
+      <div className="pointer-events-auto flex flex-col items-center gap-2 bg-white/85 backdrop-blur-md p-2.5 sm:p-3 rounded-3xl border border-amber-200/80 shadow-lg">
+        <div className="flex items-center gap-1 text-xs font-bold text-amber-700">
+          <span>🔥</span>
           <span>James (P2)</span>
         </div>
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2 sm:gap-2.5">
           <button
             id="touch-james-left"
             {...createButtonHandlers('james', 'left')}
-            className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-b from-orange-500 to-orange-700 active:from-orange-400 active:to-orange-600 text-white flex items-center justify-center font-black shadow-lg shadow-orange-950/50 border border-orange-400/50 active:scale-90 active:translate-y-0.5 transition-transform cursor-pointer"
+            className="w-13 h-13 sm:w-15 sm:h-15 rounded-2xl bg-gradient-to-t from-amber-500 to-orange-400 active:from-amber-600 active:to-orange-500 text-white border border-amber-300 flex items-center justify-center font-bold active:scale-95 transition-all cursor-pointer shadow-sm"
             aria-label={`James ${t.touch.ariaMoveLeft}`}
           >
-            <ArrowLeft className="w-7 h-7 sm:w-8 sm:h-8" />
+            <ArrowLeft className="w-6 h-6 sm:w-7 sm:h-7" />
           </button>
           <button
             id="touch-james-jump"
             {...createButtonHandlers('james', 'jump')}
-            className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-b from-amber-400 to-orange-600 active:from-amber-300 active:to-orange-500 text-white flex items-center justify-center font-black shadow-lg shadow-orange-950/50 border border-amber-300/60 active:scale-90 active:translate-y-0.5 transition-transform cursor-pointer"
+            className="w-13 h-13 sm:w-15 sm:h-15 rounded-2xl bg-gradient-to-t from-amber-400 to-amber-300 active:from-amber-500 active:to-amber-400 text-amber-950 border border-amber-200 flex items-center justify-center font-bold active:scale-95 transition-all cursor-pointer shadow-sm"
             aria-label={`James ${t.touch.ariaJump}`}
           >
-            <ArrowUp className="w-7 h-7 sm:w-8 sm:h-8" />
+            <ArrowUp className="w-6 h-6 sm:w-7 sm:h-7" />
           </button>
           <button
             id="touch-james-right"
             {...createButtonHandlers('james', 'right')}
-            className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-b from-orange-500 to-orange-700 active:from-orange-400 active:to-orange-600 text-white flex items-center justify-center font-black shadow-lg shadow-orange-950/50 border border-orange-400/50 active:scale-90 active:translate-y-0.5 transition-transform cursor-pointer"
+            className="w-13 h-13 sm:w-15 sm:h-15 rounded-2xl bg-gradient-to-t from-amber-500 to-orange-400 active:from-amber-600 active:to-orange-500 text-white border border-amber-300 flex items-center justify-center font-bold active:scale-95 transition-all cursor-pointer shadow-sm"
             aria-label={`James ${t.touch.ariaMoveRight}`}
           >
-            <ArrowRight className="w-7 h-7 sm:w-8 sm:h-8" />
+            <ArrowRight className="w-6 h-6 sm:w-7 sm:h-7" />
           </button>
         </div>
       </div>
     </div>
   );
 };
-
-

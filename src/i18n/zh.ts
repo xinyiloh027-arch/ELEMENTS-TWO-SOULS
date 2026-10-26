@@ -37,6 +37,19 @@ export const zhTranslations: TranslationDictionary = {
     coopBadge: '联机',
   },
 
+  titleScreen: {
+    subtitle: '双灵漫游 · 唤醒世界之光',
+    subText: '水与火的相遇，开启云端之上的奇幻冒险',
+    startGame: '开始游戏',
+    startGameSub: 'ENTER THE REALM',
+    duoBadge: '双灵同心',
+    p1Name: 'Xinyi (心怡)',
+    p2Name: 'James (子豪)',
+    p1Role: '流水之灵 · 澄澈与滋养',
+    p2Role: '烈火之灵 · 温暖与勇气',
+    backToTitle: '返回封面',
+  },
+
   lobby: {
     badge: '双人在线联机 (Online Co-op)',
     title: '双人冒险房间',

@@ -15,6 +15,10 @@ import { socketService } from '../services/socketService';
 import { ConnectionStatus, PlayerId, RoomState } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LanguageSelector } from './LanguageSelector';
+import { playUISound } from '../services/audioService';
+import { triggerSparkleEffect } from '../services/sparkleEffect';
+
+import skyTempleImg from '../assets/images/sky_temple_clouds_1793017137822.jpg';
 
 interface OnlineLobbyViewProps {
   onBackToHome: () => void;
@@ -39,7 +43,6 @@ export const OnlineLobbyView: React.FC<OnlineLobbyViewProps> = ({
     socketService.getStatus()
   );
 
-  // Stable references for socket event callbacks to avoid tearing down listeners
   const currentRoomRef = useRef<RoomState | null>(null);
   currentRoomRef.current = currentRoom;
   const myRoleRef = useRef<PlayerId>(myRole);
@@ -92,13 +95,14 @@ export const OnlineLobbyView: React.FC<OnlineLobbyViewProps> = ({
 
   // Handle Create Room
   const handleCreateRoom = async () => {
+    playUISound('click');
     setIsLoading(true);
     setErrorMessage('');
     const res = await socketService.createRoom('Xinyi');
     setIsLoading(false);
     if (res.success && res.room && res.roomCode) {
-      setMyRole((res.player?.id as PlayerId) || 'xinyi');
       setCurrentRoom(res.room);
+      setMyRole('xinyi');
       setSubView('waiting');
     } else {
       setErrorMessage(res.error || t.lobby.errorCreateFailed);
@@ -107,110 +111,111 @@ export const OnlineLobbyView: React.FC<OnlineLobbyViewProps> = ({
 
   // Handle Join Room
   const handleJoinRoom = async () => {
-    const code = roomCodeInput.trim();
-    if (code.length !== 6) {
+    if (roomCodeInput.trim().length !== 6) {
       setErrorMessage(t.lobby.errorInvalidCode);
       return;
     }
-
+    playUISound('click');
     setIsLoading(true);
     setErrorMessage('');
-    const res = await socketService.joinRoom(code, 'James');
+    const res = await socketService.joinRoom(roomCodeInput.trim(), 'James');
     setIsLoading(false);
     if (res.success && res.room) {
-      setMyRole((res.player?.id as PlayerId) || 'james');
       setCurrentRoom(res.room);
+      setMyRole('james');
       setSubView('lobby');
     } else {
       setErrorMessage(res.error || t.lobby.errorJoinFailed);
     }
   };
 
-  // Toggle Ready
-  const handleToggleReady = async () => {
-    const nextState = !isReady;
-    setIsReady(nextState);
-    await socketService.setReady(nextState);
+  // Handle Toggle Ready Status
+  const handleToggleReady = () => {
+    if (!currentRoom) return;
+    playUISound('toggle');
+    const nextReady = !isReady;
+    setIsReady(nextReady);
+    socketService.setReady(nextReady);
   };
 
-  // Copy Room Code to clipboard
-  const handleCopyCode = () => {
-    if (!currentRoom?.roomCode) return;
-    navigator.clipboard.writeText(currentRoom.roomCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  // Handle Copy Room Code
+  const handleCopyCode = async () => {
+    if (!currentRoom) return;
+    playUISound('click');
+    try {
+      await navigator.clipboard.writeText(currentRoom.roomCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Fallback
+    }
   };
 
-  // Leave room and return to multiplayer menu
+  // Handle Leave Room
   const handleLeaveRoom = () => {
+    playUISound('back');
     socketService.leaveRoom();
     setCurrentRoom(null);
     setIsReady(false);
     setCountdown(null);
-    setErrorMessage('');
     setSubView('menu');
   };
 
   const p1 = currentRoom?.players.xinyi || currentRoom?.players.lumi;
   const p2 = currentRoom?.players.james || currentRoom?.players.flare;
-  const bothReady = !!(p1?.isReady && p2?.isReady);
+  const isBothReady = Boolean(p1?.isReady && p2?.isReady);
 
   return (
-    <div className="relative min-h-screen w-full flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-b from-sky-100 via-sky-50 to-amber-50 text-slate-800 select-none overflow-hidden">
-      {/* Background glowing decorations */}
-      <div className="absolute top-10 left-1/3 w-80 h-80 rounded-full bg-sky-200/40 blur-3xl pointer-events-none" />
-      <div className="absolute bottom-10 right-1/3 w-80 h-80 rounded-full bg-orange-200/40 blur-3xl pointer-events-none" />
-
-      {/* Top Left: Language Selector */}
-      <div className="absolute top-3 sm:top-4 left-3 sm:left-4 z-20">
-        <LanguageSelector compact />
+    <div className="relative min-h-screen w-full flex flex-col items-center justify-center p-4 sm:p-6 text-[#1e293b] overflow-hidden select-none">
+      {/* 1. Cinematic Sky Background */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
+        <img
+          src={skyTempleImg}
+          alt="Fantasy Sky Mountain Temple"
+          className="w-full h-full object-cover object-center transform scale-105 will-change-transform"
+          loading="eager"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0a192f]/85 via-[#0a192f]/40 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 backdrop-blur-[2px] bg-slate-900/25 pointer-events-none" />
       </div>
 
-      {/* Network status indicator in top-right */}
-      <div className="absolute top-3 sm:top-4 right-3 sm:right-4 z-20 flex items-center gap-2">
-        <div
-          className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold backdrop-blur-md shadow-xs border ${
-            connectionStatus === 'connected'
-              ? 'bg-emerald-100/90 border-emerald-300 text-emerald-700'
-              : connectionStatus === 'connecting'
-              ? 'bg-sky-100/90 border-sky-300 text-sky-700'
-              : connectionStatus === 'unconfigured'
-              ? 'bg-amber-100/90 border-amber-400 text-amber-800'
-              : 'bg-rose-100/90 border-rose-300 text-rose-700'
-          }`}
-        >
+      {/* 2. Top Header Bar: Language Switcher and Server Connection Indicator */}
+      <div className="absolute top-3 sm:top-5 left-3 sm:left-6 z-20">
+        <div className="backdrop-blur-md bg-white/80 hover:bg-white/95 rounded-full border border-white/60 shadow-[0_4px_16px_rgba(0,0,0,0.1)] transition-all">
+          <LanguageSelector />
+        </div>
+      </div>
+
+      <div className="absolute top-3 sm:top-5 right-3 sm:right-6 z-20">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full backdrop-blur-md bg-white/80 border border-white/60 shadow-[0_4px_16px_rgba(0,0,0,0.1)] text-xs font-bold text-[#1e293b]">
           <span
-            className={`w-2 h-2 rounded-full ${
+            className={`w-2.5 h-2.5 rounded-full ${
               connectionStatus === 'connected'
-                ? 'bg-emerald-500 animate-pulse'
+                ? 'bg-emerald-500 shadow-[0_0_8px_#10b981]'
                 : connectionStatus === 'connecting'
-                ? 'bg-sky-500 animate-ping'
-                : connectionStatus === 'unconfigured'
-                ? 'bg-amber-500'
-                : 'bg-rose-500 animate-ping'
+                ? 'bg-amber-400 animate-ping'
+                : 'bg-rose-500'
             }`}
           />
-          <span>
+          <span className="hidden sm:inline">
             {connectionStatus === 'connected'
               ? t.lobby.serverConnected
               : connectionStatus === 'connecting'
               ? t.lobby.serverConnecting
-              : connectionStatus === 'unconfigured'
-              ? t.lobby.serverUnconfigured
-              : t.lobby.serverReconnecting}
+              : t.lobby.serverUnconfigured}
           </span>
         </div>
       </div>
 
-      {/* Main Card Container */}
+      {/* 3. Main Center Menu Container */}
       <div className="relative z-10 max-w-xl w-full flex flex-col items-center">
-        {/* Error message banner */}
+        {/* Error Alert Banner */}
         {errorMessage && (
-          <div className="w-full mb-4 px-4 py-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-sm font-semibold flex items-center justify-between shadow-sm animate-fade-in">
-            <span>{errorMessage}</span>
+          <div className="mb-4 w-full p-4 rounded-2xl bg-[#fee2e2]/95 border border-rose-300 text-[#991b1b] text-sm font-bold flex items-center justify-between shadow-lg animate-fade-in">
+            <span>⚠️ {errorMessage}</span>
             <button
               onClick={() => setErrorMessage('')}
-              className="text-rose-500 hover:text-rose-700 font-bold ml-2 text-base cursor-pointer"
+              className="text-xs underline hover:text-rose-900 cursor-pointer"
             >
               ✕
             </button>
@@ -219,66 +224,71 @@ export const OnlineLobbyView: React.FC<OnlineLobbyViewProps> = ({
 
         {/* 1. Multiplayer Selection Menu */}
         {subView === 'menu' && (
-          <div className="w-full bg-white/95 backdrop-blur-md p-6 sm:p-8 rounded-3xl border-2 border-sky-200/80 shadow-2xl space-y-6 text-center animate-fade-in">
+          <div className="card-fantasy relative w-full p-6 sm:p-8 rounded-3xl space-y-6 text-center animate-fade-in">
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-100 text-sky-700 text-xs font-bold">
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-sky-100/90 border border-sky-300 text-[#0369a1] text-xs font-bold shadow-xs">
                 <Users className="w-3.5 h-3.5" />
                 <span>{t.lobby.badge}</span>
               </div>
-              <h2 className="text-3xl sm:text-4xl font-black text-slate-800">
+              <h2 className="text-3xl sm:text-4xl font-black text-[#0f172a]">
                 {t.lobby.title}
               </h2>
-              <p className="text-sm text-slate-500 font-medium">
+              <p className="text-sm text-[#475569] font-medium">
                 {t.lobby.subtitle}
               </p>
             </div>
 
             {/* Two Main Choice Buttons */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-              {/* Create Room Button (Min 56px height) */}
+              {/* Create Room Button (Sky Blue Fantasy Style) */}
               <button
                 id="btn-create-room"
-                onClick={handleCreateRoom}
+                onClick={(e) => {
+                  triggerSparkleEffect(e);
+                  handleCreateRoom();
+                }}
                 disabled={isLoading}
-                className="group flex flex-col items-center justify-center gap-2.5 p-6 rounded-2xl bg-gradient-to-b from-sky-50 to-sky-100 hover:from-sky-100 hover:to-sky-200 border-2 border-sky-300 hover:border-sky-500 shadow-md hover:shadow-lg transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50"
+                className="btn-fantasy-secondary group flex flex-col items-center justify-center gap-2.5 p-6 rounded-3xl cursor-pointer disabled:opacity-50"
               >
-                <div className="w-14 h-14 rounded-2xl bg-sky-500 text-white flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
+                <div className="w-14 h-14 rounded-2xl bg-white text-[#0284c7] border border-sky-200 flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
                   <PlusCircle className="w-7 h-7" />
                 </div>
                 <div className="text-center leading-tight">
-                  <span className="text-lg font-black text-sky-700 block">
+                  <span className="text-lg font-black text-[#0369a1] block">
                     {t.lobby.createRoom}
                   </span>
-                  <span className="text-[11px] sm:text-xs font-extrabold tracking-wider text-sky-600 uppercase block mt-0.5">
+                  <span className="text-[11px] sm:text-xs font-extrabold tracking-wider text-[#0284c7] uppercase block mt-0.5">
                     {t.lobby.createRoomSub}
                   </span>
-                  <span className="text-xs font-medium text-slate-500 block mt-1.5">
+                  <span className="text-xs font-medium text-[#475569] block mt-1.5">
                     {t.lobby.createRoomHint}
                   </span>
                 </div>
               </button>
 
-              {/* Join Room Button (Min 56px height) */}
+              {/* Join Room Button (Warm Golden Fantasy Style) */}
               <button
                 id="btn-join-room-nav"
-                onClick={() => {
+                onClick={(e) => {
+                  playUISound('click');
+                  triggerSparkleEffect(e);
                   setErrorMessage('');
                   setSubView('join');
                 }}
                 disabled={isLoading}
-                className="group flex flex-col items-center justify-center gap-2.5 p-6 rounded-2xl bg-gradient-to-b from-orange-50 to-orange-100 hover:from-orange-100 hover:to-orange-200 border-2 border-orange-300 hover:border-orange-500 shadow-md hover:shadow-lg transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50"
+                className="btn-fantasy-primary group flex flex-col items-center justify-center gap-2.5 p-6 rounded-3xl cursor-pointer disabled:opacity-50"
               >
-                <div className="w-14 h-14 rounded-2xl bg-orange-500 text-white flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
+                <div className="w-14 h-14 rounded-2xl bg-white text-[#ea580c] border border-amber-200 flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
                   <LogIn className="w-7 h-7" />
                 </div>
                 <div className="text-center leading-tight">
-                  <span className="text-lg font-black text-orange-700 block">
+                  <span className="text-lg font-black text-[#78350f] block">
                     {t.lobby.joinRoom}
                   </span>
-                  <span className="text-[11px] sm:text-xs font-extrabold tracking-wider text-orange-600 uppercase block mt-0.5">
+                  <span className="text-[11px] sm:text-xs font-extrabold tracking-wider text-[#b45309] uppercase block mt-0.5">
                     {t.lobby.joinRoomSub}
                   </span>
-                  <span className="text-xs font-medium text-slate-500 block mt-1.5">
+                  <span className="text-xs font-medium text-[#475569] block mt-1.5">
                     {t.lobby.joinRoomHint}
                   </span>
                 </div>
@@ -289,8 +299,12 @@ export const OnlineLobbyView: React.FC<OnlineLobbyViewProps> = ({
             <div className="pt-2">
               <button
                 id="btn-back-home"
-                onClick={onBackToHome}
-                className="inline-flex items-center justify-center gap-2 h-14 px-8 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-base transition-all active:scale-95 cursor-pointer"
+                onClick={(e) => {
+                  playUISound('back');
+                  triggerSparkleEffect(e);
+                  onBackToHome();
+                }}
+                className="btn-fantasy-utility inline-flex items-center justify-center gap-2 h-13 px-8 rounded-2xl font-bold text-base cursor-pointer"
               >
                 <ArrowLeft className="w-5 h-5" />
                 <span>{t.lobby.backToHome}</span>
@@ -301,19 +315,19 @@ export const OnlineLobbyView: React.FC<OnlineLobbyViewProps> = ({
 
         {/* 2. Join Room Input View */}
         {subView === 'join' && (
-          <div className="w-full bg-white/95 backdrop-blur-md p-6 sm:p-8 rounded-3xl border-2 border-orange-200/80 shadow-2xl space-y-6 text-center animate-fade-in">
+          <div className="card-fantasy relative w-full p-6 sm:p-8 rounded-3xl space-y-6 text-center animate-fade-in">
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-bold">
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-amber-100/90 border border-amber-300 text-[#b45309] text-xs font-bold shadow-xs">
                 <LogIn className="w-3.5 h-3.5" />
                 <span>{t.lobby.joinRoomTitle}</span>
               </div>
-              <h2 className="text-3xl font-black text-slate-800">{t.lobby.joinRoomTitle}</h2>
-              <p className="text-sm text-slate-500 font-medium">
+              <h2 className="text-3xl font-black text-[#0f172a]">{t.lobby.joinRoomTitle}</h2>
+              <p className="text-sm text-[#475569] font-medium">
                 {t.lobby.joinRoomSubtitle}
               </p>
             </div>
 
-            {/* 6-Digit Code Input (Large typography) */}
+            {/* 6-Digit Code Input */}
             <div className="space-y-3">
               <input
                 id="input-room-code"
@@ -322,7 +336,7 @@ export const OnlineLobbyView: React.FC<OnlineLobbyViewProps> = ({
                 value={roomCodeInput}
                 onChange={(e) => setRoomCodeInput(e.target.value.replace(/\D/g, ''))}
                 placeholder={t.lobby.roomCodePlaceholder}
-                className="w-full max-w-xs mx-auto h-16 text-center text-3xl font-mono font-black tracking-widest rounded-2xl border-2 border-orange-300 focus:border-orange-500 focus:ring-4 focus:ring-orange-200 bg-orange-50/50 text-slate-800 placeholder:text-slate-300 transition-all outline-none"
+                className="w-full max-w-xs mx-auto h-16 text-center text-3xl font-mono font-black tracking-widest rounded-2xl border-2 border-amber-300/80 focus:border-amber-500 focus:ring-4 focus:ring-amber-200/50 bg-white/95 text-[#0f172a] placeholder:text-[#94a3b8] shadow-inner transition-all outline-none"
               />
             </div>
 
@@ -330,17 +344,24 @@ export const OnlineLobbyView: React.FC<OnlineLobbyViewProps> = ({
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
               <button
                 id="btn-back-to-menu"
-                onClick={() => setSubView('menu')}
-                className="w-full sm:w-auto h-14 px-8 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-base transition-all active:scale-95 cursor-pointer"
+                onClick={(e) => {
+                  playUISound('back');
+                  triggerSparkleEffect(e);
+                  setSubView('menu');
+                }}
+                className="btn-fantasy-utility w-full sm:w-auto h-13 px-8 rounded-2xl font-bold text-base cursor-pointer"
               >
                 {t.lobby.backBtn}
               </button>
 
               <button
                 id="btn-confirm-join"
-                onClick={handleJoinRoom}
+                onClick={(e) => {
+                  triggerSparkleEffect(e);
+                  handleJoinRoom();
+                }}
                 disabled={roomCodeInput.length !== 6 || isLoading}
-                className="w-full sm:w-auto min-w-[200px] h-14 px-8 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white font-black text-lg shadow-lg shadow-orange-500/30 transition-all active:scale-95 cursor-pointer disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center gap-2"
+                className="btn-fantasy-primary w-full sm:w-auto min-w-[200px] h-13 px-8 rounded-2xl font-black text-lg transition-all cursor-pointer disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center gap-2"
               >
                 {isLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
@@ -349,7 +370,7 @@ export const OnlineLobbyView: React.FC<OnlineLobbyViewProps> = ({
                 )}
                 <div className="flex flex-col items-center leading-tight">
                   <span className="font-black text-lg">{t.lobby.joinConfirmBtn}</span>
-                  <span className="text-[10px] font-extrabold tracking-wider text-orange-100 uppercase">
+                  <span className="text-[10px] font-extrabold tracking-wider text-[#78350f] uppercase">
                     {t.lobby.joinConfirmBtnSub}
                   </span>
                 </div>
@@ -360,38 +381,41 @@ export const OnlineLobbyView: React.FC<OnlineLobbyViewProps> = ({
 
         {/* 3. Waiting for Teammate View (Host waiting for Player 2) */}
         {subView === 'waiting' && currentRoom && (
-          <div className="w-full bg-white/95 backdrop-blur-md p-6 sm:p-8 rounded-3xl border-2 border-sky-200/80 shadow-2xl space-y-6 text-center animate-fade-in">
+          <div className="card-fantasy relative w-full p-6 sm:p-8 rounded-3xl space-y-6 text-center animate-fade-in">
             <div className="space-y-1">
-              <span className="text-xs font-bold uppercase tracking-wider text-sky-600 bg-sky-100 px-3 py-1 rounded-full">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#0369a1] bg-sky-100/90 border border-sky-300 px-3.5 py-1 rounded-full shadow-xs">
                 {t.lobby.roomCreatedBadge}
               </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-800 pt-2">
+              <h2 className="text-2xl sm:text-3xl font-black text-[#0f172a] pt-2">
                 {t.lobby.shareCodeTitle}
               </h2>
             </div>
 
-            {/* Big Room Code Display with Copy Button */}
-            <div className="p-6 rounded-2xl bg-gradient-to-b from-sky-50 to-white border-2 border-sky-300 shadow-inner flex flex-col items-center gap-3">
-              <span className="text-xs font-bold text-slate-500">{t.lobby.roomCodeLabel}</span>
-              <div className="text-4xl sm:text-5xl font-mono font-black tracking-widest text-sky-600">
+            {/* Ticket Code Display with Copy Button */}
+            <div className="p-6 rounded-2xl bg-white/80 border border-sky-200/80 shadow-inner flex flex-col items-center gap-3 relative">
+              <span className="text-xs font-bold text-[#64748b]">{t.lobby.roomCodeLabel}</span>
+              <div className="text-4xl sm:text-5xl font-mono font-black tracking-widest text-[#0369a1] drop-shadow-sm">
                 {currentRoom.roomCode}
               </div>
 
-              {/* Copy Button (Min 48px) */}
+              {/* Copy Button */}
               <button
                 id="btn-copy-code"
-                onClick={handleCopyCode}
-                className="inline-flex items-center gap-2 h-12 px-6 rounded-xl bg-sky-500 hover:bg-sky-600 active:scale-95 text-white font-bold text-sm shadow-md transition-all cursor-pointer"
+                onClick={(e) => {
+                  triggerSparkleEffect(e);
+                  handleCopyCode();
+                }}
+                className="btn-fantasy-secondary inline-flex items-center gap-2 h-11 px-6 rounded-2xl font-bold text-sm cursor-pointer"
               >
-                {copied ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
+                {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
                 <span>{copied ? t.lobby.copiedText : t.lobby.copyCodeBtn}</span>
               </button>
             </div>
 
             {/* Waiting pulse indicator */}
-            <div className="flex items-center justify-center gap-3 py-2 text-slate-600 font-medium">
+            <div className="flex items-center justify-center gap-3 py-2 text-[#0369a1] font-medium">
               <Loader2 className="w-5 h-5 text-sky-500 animate-spin" />
-              <span className="text-base font-bold animate-pulse text-sky-600">
+              <span className="text-base font-bold animate-pulse">
                 {t.lobby.waitingTeammate}
               </span>
             </div>
@@ -400,8 +424,11 @@ export const OnlineLobbyView: React.FC<OnlineLobbyViewProps> = ({
             <div className="pt-2">
               <button
                 id="btn-leave-waiting-room"
-                onClick={handleLeaveRoom}
-                className="h-14 px-8 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-base transition-all active:scale-95 cursor-pointer"
+                onClick={(e) => {
+                  triggerSparkleEffect(e);
+                  handleLeaveRoom();
+                }}
+                className="btn-fantasy-utility h-13 px-8 rounded-2xl font-bold text-base cursor-pointer"
               >
                 {t.lobby.cancelAndReturn}
               </button>
@@ -411,24 +438,27 @@ export const OnlineLobbyView: React.FC<OnlineLobbyViewProps> = ({
 
         {/* 4. Room Lobby View (Both players present) */}
         {subView === 'lobby' && currentRoom && (
-          <div className="w-full bg-white/95 backdrop-blur-md p-6 sm:p-8 rounded-3xl border-2 border-sky-300 shadow-2xl space-y-6 text-center animate-fade-in">
+          <div className="card-fantasy relative w-full p-6 sm:p-8 rounded-3xl space-y-6 text-center animate-fade-in">
             {/* Header: Room Code Badge */}
-            <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+            <div className="flex items-center justify-between border-b border-slate-200/70 pb-4">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-slate-400">{t.lobby.roomCodeHeader}</span>
-                <span className="text-xl font-mono font-black text-slate-800 tracking-wider">
+                <span className="text-xs font-bold text-[#64748b]">{t.lobby.roomCodeHeader}</span>
+                <span className="text-xl font-mono font-black text-[#0f172a] tracking-wider">
                   #{currentRoom.roomCode}
                 </span>
                 <button
-                  onClick={handleCopyCode}
-                  className="p-1 text-slate-400 hover:text-sky-600 transition-colors cursor-pointer"
+                  onClick={(e) => {
+                    triggerSparkleEffect(e);
+                    handleCopyCode();
+                  }}
+                  className="p-1 text-[#64748b] hover:text-[#0369a1] transition-colors cursor-pointer"
                   title={t.lobby.copyCodeBtn}
                 >
-                  {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                  {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
                 </button>
               </div>
 
-              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100/90 border border-emerald-300 text-emerald-800 text-xs font-bold shadow-xs">
                 <Users className="w-3.5 h-3.5" />
                 <span>{t.lobby.playersReadyHeader}</span>
               </div>
@@ -438,37 +468,34 @@ export const OnlineLobbyView: React.FC<OnlineLobbyViewProps> = ({
             <div className="grid grid-cols-2 gap-4">
               {/* Player 1 Card: Xinyi */}
               <div
-                className={`p-4 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all ${
+                className={`p-4 rounded-2xl border transition-all ${
                   p1?.isReady
-                    ? 'bg-sky-50/90 border-sky-500 shadow-md ring-2 ring-sky-300/60'
-                    : 'bg-white border-slate-200 shadow-sm'
+                    ? 'bg-sky-100/90 border-sky-300 shadow-md'
+                    : 'bg-white/80 border-slate-200 shadow-xs'
                 }`}
               >
-                <div className="relative w-16 h-16 flex items-center justify-center">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-sky-500 to-sky-400 shadow-md flex items-center justify-center border-2 border-sky-600">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-slate-900" />
-                      <div className="w-2 h-2 rounded-full bg-slate-900" />
-                    </div>
+                <div className="relative w-16 h-16 mx-auto mb-2 flex items-center justify-center">
+                  <div className="w-14 h-14 rounded-2xl bg-[#e0f2fe] border border-sky-300 shadow-xs flex items-center justify-center text-2xl">
+                    💧
                   </div>
                   {(myRole === 'xinyi' || myRole === 'lumi') && (
-                    <span className="absolute -bottom-1 px-2 py-0.2 rounded-full bg-sky-600 text-[10px] font-black text-white">
+                    <span className="absolute -bottom-1 px-2 py-0.2 rounded-full bg-[#0284c7] text-[10px] font-black text-white shadow-xs">
                       {t.lobby.youBadge}
                     </span>
                   )}
                 </div>
 
                 <div className="text-center">
-                  <div className="text-base font-black text-sky-600">🔵 Xinyi (P1)</div>
-                  <div className="text-xs text-slate-400">{t.lobby.p1HostBadge}</div>
+                  <div className="text-base font-black text-[#0369a1]">Xinyi (P1)</div>
+                  <div className="text-xs text-[#64748b]">{t.lobby.p1HostBadge}</div>
                 </div>
 
                 {/* Ready Status Badge */}
                 <div
-                  className={`mt-1 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${
+                  className={`mt-2 px-3 py-1 rounded-full text-xs font-bold flex items-center justify-center gap-1 border ${
                     p1?.isReady
-                      ? 'bg-emerald-500 text-white shadow-xs'
-                      : 'bg-slate-100 text-slate-400'
+                      ? 'bg-emerald-500 text-white border-emerald-600 shadow-xs'
+                      : 'bg-slate-100 text-[#64748b] border-slate-200'
                   }`}
                 >
                   {p1?.isReady ? (
@@ -484,37 +511,34 @@ export const OnlineLobbyView: React.FC<OnlineLobbyViewProps> = ({
 
               {/* Player 2 Card: James */}
               <div
-                className={`p-4 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all ${
+                className={`p-4 rounded-2xl border transition-all ${
                   p2?.isReady
-                    ? 'bg-orange-50/90 border-orange-500 shadow-md ring-2 ring-orange-300/60'
-                    : 'bg-white border-slate-200 shadow-sm'
+                    ? 'bg-amber-100/90 border-amber-300 shadow-md'
+                    : 'bg-white/80 border-slate-200 shadow-xs'
                 }`}
               >
-                <div className="relative w-16 h-16 flex items-center justify-center">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-400 shadow-md flex items-center justify-center border-2 border-orange-600">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-slate-900" />
-                      <div className="w-2 h-2 rounded-full bg-slate-900" />
-                    </div>
+                <div className="relative w-16 h-16 mx-auto mb-2 flex items-center justify-center">
+                  <div className="w-14 h-14 rounded-2xl bg-[#ffedd5] border border-amber-300 shadow-xs flex items-center justify-center text-2xl">
+                    🔥
                   </div>
                   {(myRole === 'james' || myRole === 'flare') && (
-                    <span className="absolute -bottom-1 px-2 py-0.2 rounded-full bg-orange-600 text-[10px] font-black text-white">
+                    <span className="absolute -bottom-1 px-2 py-0.2 rounded-full bg-[#ea580c] text-[10px] font-black text-white shadow-xs">
                       {t.lobby.youBadge}
                     </span>
                   )}
                 </div>
 
                 <div className="text-center">
-                  <div className="text-base font-black text-orange-600">🟠 James (P2)</div>
-                  <div className="text-xs text-slate-400">{t.lobby.p2TeammateBadge}</div>
+                  <div className="text-base font-black text-[#c2410c]">James (P2)</div>
+                  <div className="text-xs text-[#64748b]">{t.lobby.p2TeammateBadge}</div>
                 </div>
 
                 {/* Ready Status Badge */}
                 <div
-                  className={`mt-1 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${
+                  className={`mt-2 px-3 py-1 rounded-full text-xs font-bold flex items-center justify-center gap-1 border ${
                     p2?.isReady
-                      ? 'bg-emerald-500 text-white shadow-xs'
-                      : 'bg-slate-100 text-slate-400'
+                      ? 'bg-emerald-500 text-white border-emerald-600 shadow-xs'
+                      : 'bg-slate-100 text-[#64748b] border-slate-200'
                   }`}
                 >
                   {p2?.isReady ? (
@@ -529,43 +553,38 @@ export const OnlineLobbyView: React.FC<OnlineLobbyViewProps> = ({
               </div>
             </div>
 
-            {/* Ready Status Tip */}
-            <div className="text-xs font-semibold text-slate-500">
-              {bothReady
-                ? t.lobby.bothReadyTip
-                : t.lobby.notReadyTip}
+            {/* Tip Message */}
+            <div className="text-xs font-semibold text-[#64748b]">
+              {isBothReady ? t.lobby.bothReadyTip : t.lobby.notReadyTip}
             </div>
 
-            {/* Action: Giant READY Button (Min 56px height) */}
+            {/* Actions: Toggle Ready & Leave Room */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
               <button
                 id="btn-leave-lobby"
-                onClick={handleLeaveRoom}
-                className="w-full sm:w-auto h-16 px-8 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-base transition-all active:scale-95 cursor-pointer"
+                onClick={(e) => {
+                  triggerSparkleEffect(e);
+                  handleLeaveRoom();
+                }}
+                className="btn-fantasy-utility w-full sm:w-auto h-13 px-8 rounded-2xl font-bold text-base cursor-pointer"
               >
                 {t.lobby.leaveRoomBtn}
               </button>
 
               <button
                 id="btn-toggle-ready"
-                onClick={handleToggleReady}
-                className={`w-full sm:w-auto min-w-[240px] h-16 px-10 rounded-2xl font-black text-xl shadow-xl transition-all duration-200 active:scale-95 cursor-pointer border-2 flex items-center justify-center gap-3 ${
+                onClick={(e) => {
+                  triggerSparkleEffect(e);
+                  handleToggleReady();
+                }}
+                className={`w-full sm:w-auto min-w-[200px] h-13 px-8 rounded-2xl font-black text-lg transition-all cursor-pointer flex items-center justify-center gap-2 shadow-lg active:scale-95 ${
                   isReady
-                    ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white border-white/50 shadow-emerald-500/30'
-                    : 'bg-gradient-to-r from-sky-500 via-indigo-500 to-orange-500 hover:from-sky-400 hover:to-orange-400 text-white border-white/40 shadow-sky-500/30'
+                    ? 'btn-fantasy-utility bg-amber-100 hover:bg-amber-200 text-[#b45309] border-amber-300'
+                    : 'btn-fantasy-primary'
                 }`}
               >
-                {isReady ? (
-                  <>
-                    <Check className="w-6 h-6 stroke-[3]" />
-                    <span>{t.lobby.cancelReadyBtnText}</span>
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-6 h-6 fill-white" />
-                    <span>{t.lobby.readyBtnText}</span>
-                  </>
-                )}
+                <ShieldCheck className="w-5 h-5" />
+                <span>{isReady ? t.lobby.cancelReadyBtnText : t.lobby.readyBtnText}</span>
               </button>
             </div>
           </div>
@@ -574,17 +593,15 @@ export const OnlineLobbyView: React.FC<OnlineLobbyViewProps> = ({
 
       {/* 5. Giant Countdown Overlay (3 -> 2 -> 1 -> START) */}
       {countdown !== null && countdown >= 0 && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/80 backdrop-blur-md animate-fade-in select-none">
-          <div className="text-center space-y-4">
-            <span className="text-sm sm:text-base font-bold uppercase tracking-widest text-sky-400">
-              {t.lobby.countdownTitle}
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/70 backdrop-blur-md animate-fade-in select-none">
+          <div className="card-fantasy relative p-8 sm:p-12 rounded-3xl shadow-2xl flex flex-col items-center gap-4 animate-bounce border-2 border-amber-300">
+            <span className="text-7xl sm:text-9xl font-black text-[#f59e0b] font-mono drop-shadow-[0_4px_16px_rgba(245,158,11,0.5)]">
+              {countdown === 0 ? 'GO!' : countdown}
             </span>
-
-            <div className="text-8xl sm:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-amber-300 to-orange-500 animate-bounce drop-shadow-2xl">
-              {countdown === 0 ? 'START!' : countdown}
+            <div className="text-xl sm:text-2xl font-black text-[#0f172a]">
+              {t.lobby.countdownTitle}
             </div>
-
-            <p className="text-slate-300 text-sm font-semibold">
+            <p className="text-[#64748b] text-sm font-semibold">
               {t.lobby.countdownSubtitle}
             </p>
           </div>
