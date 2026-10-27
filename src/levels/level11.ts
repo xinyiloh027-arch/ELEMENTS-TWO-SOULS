@@ -3,104 +3,28 @@ import { GameLevel } from '../types';
 export const LEVEL_11: GameLevel = {
   id: 11,
   title: '11 Sky Transport Station',
-  subtitle: '天空运输站 · 掌握移动平台与双人连携，搭乘巨型运输艇',
+  subtitle: '天空运输站 · 合作跑酷与连携机关，搭乘巨型浮空艇',
   width: 3800,
   height: 720,
   theme: 'sky',
-  spawnP1: { x: 80, y: 580 },
-  spawnP2: { x: 140, y: 580 },
-  parTimeSeconds: 150,
+  spawnP1: { x: 60, y: 580 },
+  spawnP2: { x: 120, y: 580 },
+  parTimeSeconds: 160,
   clouds: [
-    { x: 50, y: 60, width: 150, speed: 0.22, opacity: 0.7 },
-    { x: 500, y: 75, width: 170, speed: 0.25, opacity: 0.65 },
-    { x: 1100, y: 60, width: 180, speed: 0.2, opacity: 0.6 },
-    { x: 1750, y: 80, width: 160, speed: 0.28, opacity: 0.7 },
-    { x: 2350, y: 70, width: 190, speed: 0.24, opacity: 0.65 },
-    { x: 3000, y: 60, width: 170, speed: 0.22, opacity: 0.6 },
-    { x: 3500, y: 85, width: 180, speed: 0.26, opacity: 0.7 },
+    { x: 50, y: 60, width: 160, speed: 0.22, opacity: 0.75 },
+    { x: 450, y: 80, width: 180, speed: 0.25, opacity: 0.7 },
+    { x: 1000, y: 65, width: 200, speed: 0.2, opacity: 0.65 },
+    { x: 1600, y: 85, width: 170, speed: 0.28, opacity: 0.7 },
+    { x: 2200, y: 70, width: 190, speed: 0.24, opacity: 0.65 },
+    { x: 2850, y: 60, width: 180, speed: 0.22, opacity: 0.7 },
+    { x: 3400, y: 85, width: 210, speed: 0.26, opacity: 0.75 },
   ],
   platforms: [
-    // ---------------- AREA 1: SKY ENTRANCE (x: 0 ~ 450) ----------------
+    // ---------------- AREA 1: SKY ENTRANCE & MECHANISM A (PRESSURE PLATE + LEVER) (x: 0 ~ 750) ----------------
+    // Start platform where James operates the bridge lever
     {
       id: 'l11-ground-a1-start',
       x: 0,
-      y: 640,
-      width: 280,
-      height: 80,
-      type: 'ground',
-      color: '#0f172a',
-      topColor: '#38bdf8',
-    },
-    {
-      id: 'l11-ground-a1-terminal-island',
-      x: 320,
-      y: 640,
-      width: 160,
-      height: 80,
-      type: 'ground',
-      color: '#0f172a',
-      topColor: '#38bdf8',
-    },
-
-    // ---------------- AREA 2: TRAINING ZONE (x: 450 ~ 950) ----------------
-    {
-      id: 'l11-ground-a2-start',
-      x: 520,
-      y: 640,
-      width: 140,
-      height: 80,
-      type: 'ground',
-      color: '#0f172a',
-      topColor: '#38bdf8',
-    },
-    {
-      id: 'l11-ground-a2-end',
-      x: 820,
-      y: 640,
-      width: 160,
-      height: 80,
-      type: 'ground',
-      color: '#0f172a',
-      topColor: '#38bdf8',
-    },
-
-    // ---------------- AREA 3: MOVING PLATFORM CANYON (x: 950 ~ 1550) ----------------
-    {
-      id: 'l11-ground-a3-west',
-      x: 980,
-      y: 640,
-      width: 180,
-      height: 80,
-      type: 'ground',
-      color: '#0f172a',
-      topColor: '#fb923c',
-    },
-    {
-      id: 'l11-ground-a3-mid-island',
-      x: 1220,
-      y: 640,
-      width: 140,
-      height: 80,
-      type: 'ground',
-      color: '#0f172a',
-      topColor: '#38bdf8',
-    },
-    {
-      id: 'l11-ground-a3-east',
-      x: 1420,
-      y: 640,
-      width: 160,
-      height: 80,
-      type: 'ground',
-      color: '#0f172a',
-      topColor: '#10b981',
-    },
-
-    // ---------------- AREA 4: RESCUE AREA (x: 1550 ~ 2150) ----------------
-    // Lower ground where James is positioned
-    {
-      id: 'l11-ground-a4-lower',
-      x: 1580,
       y: 640,
       width: 240,
       height: 80,
@@ -108,75 +32,56 @@ export const LEVEL_11: GameLevel = {
       color: '#0f172a',
       topColor: '#38bdf8',
     },
-    // Upper ledges where Xinyi climbs to reach rescue switch
+    // Lower stepped terrace for Xinyi to hold the pressure plate
     {
-      id: 'l11-plat-a4-xinyi-step1',
-      x: 1640,
-      y: 530,
-      width: 90,
+      id: 'l11-plat-a1-lower',
+      x: 90,
+      y: 680,
+      width: 150,
+      height: 40,
+      type: 'ground',
+      color: '#0c4a6e',
+      topColor: '#0284c7',
+    },
+    // Return step enabling Xinyi to climb up from the lower plate
+    {
+      id: 'l11-plat-a1-return-step',
+      x: 50,
+      y: 660,
+      width: 40,
       height: 20,
       type: 'platform',
-      color: '#0369a1',
-      topColor: '#38bdf8',
-    },
-    {
-      id: 'l11-plat-a4-xinyi-step2',
-      x: 1770,
-      y: 440,
-      width: 80,
-      height: 22,
-      type: 'platform',
-      color: '#0369a1',
-      topColor: '#38bdf8',
-    },
-    // Cliff wall barrier separating lower from upper until elevator rises (extended vertically to prevent any skip jump)
-    {
-      id: 'l11-wall-a4-barrier',
-      x: 1850,
-      y: 360,
-      width: 24,
-      height: 280,
-      type: 'platform',
       color: '#1e293b',
-      topColor: '#64748b',
+      topColor: '#38bdf8',
     },
-    // Upper meeting platform
+    // Landing ground across the 260px impassable sky chasm
     {
-      id: 'l11-plat-a4-upper-meet',
-      x: 1980,
-      y: 440,
-      width: 180,
-      height: 22,
-      type: 'platform',
+      id: 'l11-ground-a1-landing',
+      x: 500,
+      y: 640,
+      width: 240,
+      height: 80,
+      type: 'ground',
       color: '#0f172a',
       topColor: '#10b981',
     },
 
-    // ---------------- AREA 5: TWIN ELEVATOR (x: 2150 ~ 2750) ----------------
+    // ---------------- AREA 2: PARKOUR FLOATING LEDGES TO CHECKPOINT 1 (x: 740 ~ 1040) ----------------
+    // Elevated narrow parkour ledge requiring precision jump
     {
-      id: 'l11-ground-a5-start',
-      x: 2160,
-      y: 640,
-      width: 180,
-      height: 80,
-      type: 'ground',
-      color: '#0f172a',
-      topColor: '#38bdf8',
-    },
-    // Central high sky bridge between elevators
-    {
-      id: 'l11-plat-a5-high-bridge',
-      x: 2430,
-      y: 420,
-      width: 160,
+      id: 'l11-plat-a2-ledge1',
+      x: 780,
+      y: 590,
+      width: 80,
       height: 22,
       type: 'platform',
       color: '#1e293b',
       topColor: '#f59e0b',
     },
+    // Checkpoint 1 island
     {
-      id: 'l11-ground-a5-end',
-      x: 2650,
+      id: 'l11-ground-a2-station',
+      x: 900,
       y: 640,
       width: 140,
       height: 80,
@@ -185,46 +90,205 @@ export const LEVEL_11: GameLevel = {
       topColor: '#38bdf8',
     },
 
-    // ---------------- AREA 6: SKY FACTORY (CONVEYOR) (x: 2750 ~ 3250) ----------------
+    // ---------------- AREA 3: MECHANISM B (FIRE-POWERED JUMP LAUNCHER) (x: 1040 ~ 1600) ----------------
+    // Base launch ground
+    {
+      id: 'l11-ground-a3-launchpad',
+      x: 1070,
+      y: 640,
+      width: 170,
+      height: 80,
+      type: 'ground',
+      color: '#0f172a',
+      topColor: '#ea580c',
+    },
+    // Xinyi elevated platform to reach booster unlock plate
+    {
+      id: 'l11-plat-a3-unlock-step',
+      x: 1080,
+      y: 570,
+      width: 70,
+      height: 20,
+      type: 'platform',
+      color: '#0369a1',
+      topColor: '#38bdf8',
+    },
+    // Giant mountain cliff barrier: 360px tall, impassable barrier blocking horizontal skip
+    {
+      id: 'l11-wall-a3-barrier',
+      x: 1240,
+      y: 280,
+      width: 30,
+      height: 360,
+      type: 'platform',
+      color: '#1e293b',
+      topColor: '#64748b',
+    },
+    // High sky ledge (y: 350, 290px above ground) - reachable only by Flame Booster launcher!
+    {
+      id: 'l11-plat-a3-high-sky',
+      x: 1270,
+      y: 350,
+      width: 190,
+      height: 24,
+      type: 'platform',
+      color: '#1e293b',
+      topColor: '#fbbf24',
+    },
+    // Stepped descent plateau leading to Checkpoint 2
+    {
+      id: 'l11-ground-a3-post-launch',
+      x: 1480,
+      y: 440,
+      width: 130,
+      height: 200,
+      type: 'ground',
+      color: '#0f172a',
+      topColor: '#10b981',
+    },
+
+    // ---------------- AREA 4 & 5: MECHANISM C (TWO-SWITCH DUAL SYNC CANYON) (x: 1610 ~ 2760) ----------------
+    // Canyon entry platform
+    {
+      id: 'l11-ground-a4-entry',
+      x: 1610,
+      y: 640,
+      width: 110,
+      height: 80,
+      type: 'ground',
+      color: '#0f172a',
+      topColor: '#38bdf8',
+    },
+    // Stepping stones for James to climb to upper fire sync perch
+    {
+      id: 'l11-plat-a4-climb1',
+      x: 1630,
+      y: 540,
+      width: 50,
+      height: 18,
+      type: 'platform',
+      color: '#7c2d12',
+      topColor: '#fb923c',
+    },
+    {
+      id: 'l11-plat-a4-climb2',
+      x: 1630,
+      y: 440,
+      width: 50,
+      height: 18,
+      type: 'platform',
+      color: '#7c2d12',
+      topColor: '#fb923c',
+    },
+    // Upper fire perch for James
+    {
+      id: 'l11-plat-a4-fire-perch',
+      x: 1690,
+      y: 350,
+      width: 90,
+      height: 22,
+      type: 'platform',
+      color: '#7c2d12',
+      topColor: '#fb923c',
+    },
+    // Lower water perch for Xinyi
+    {
+      id: 'l11-plat-a4-water-perch',
+      x: 1690,
+      y: 560,
+      width: 90,
+      height: 22,
+      type: 'platform',
+      color: '#0c4a6e',
+      topColor: '#38bdf8',
+    },
+    // Canyon landing platform across the 260px gap
+    {
+      id: 'l11-ground-a4-landing',
+      x: 2040,
+      y: 440,
+      width: 130,
+      height: 200,
+      type: 'ground',
+      color: '#0f172a',
+      topColor: '#10b981',
+    },
+    // Lower ground before Twin Elevators
+    {
+      id: 'l11-ground-a5-start',
+      x: 2190,
+      y: 640,
+      width: 140,
+      height: 80,
+      type: 'ground',
+      color: '#0f172a',
+      topColor: '#38bdf8',
+    },
+    // Central high sky bridge between twin elevators
+    {
+      id: 'l11-plat-a5-high-bridge',
+      x: 2430,
+      y: 420,
+      width: 140,
+      height: 22,
+      type: 'platform',
+      color: '#1e293b',
+      topColor: '#f59e0b',
+    },
+    // Ground after Twin Elevators (Checkpoint 3 station)
+    {
+      id: 'l11-ground-a5-end',
+      x: 2640,
+      y: 640,
+      width: 130,
+      height: 80,
+      type: 'ground',
+      color: '#0f172a',
+      topColor: '#38bdf8',
+    },
+
+    // ---------------- AREA 6: THE HEAVY REVERSE CONVEYOR (x: 2770 ~ 3250) ----------------
+    // Conveyor launch dock where James holds the heavy reverse switch
     {
       id: 'l11-ground-a6-start',
-      x: 2790,
+      x: 2770,
       y: 640,
-      width: 100,
+      width: 110,
       height: 80,
       type: 'ground',
       color: '#1e293b',
       topColor: '#ea580c',
     },
+    // Landing platform where Xinyi locks the catwalk
     {
       id: 'l11-ground-a6-landing',
-      x: 3120,
+      x: 3140,
       y: 640,
-      width: 140,
+      width: 120,
       height: 80,
       type: 'ground',
       color: '#1e293b',
       topColor: '#0284c7',
     },
 
-    // ---------------- AREA 7: FINAL TRANSPORT DOCK (x: 3250 ~ 3800) ----------------
-    // Boarding platform
+    // ---------------- AREA 7: GIANT SKY TRANSPORT DOCK & EXIT (x: 3260 ~ 3800) ----------------
+    // Boarding dock
     {
       id: 'l11-ground-a7-dock',
       x: 3260,
       y: 640,
-      width: 200,
+      width: 180,
       height: 80,
       type: 'ground',
       color: '#0f172a',
       topColor: '#f59e0b',
     },
-    // High secret observation post for Gem 7
+    // High secret observation mast platform for Gem 7
     {
       id: 'l11-plat-a7-secret',
       x: 3420,
-      y: 380,
-      width: 90,
+      y: 360,
+      width: 80,
       height: 20,
       type: 'platform',
       color: '#1e293b',
@@ -243,120 +307,68 @@ export const LEVEL_11: GameLevel = {
     },
   ],
   movingPlatforms: [
-    // Area 2: Training Zone Moving Platform
+    // Area 3: Rescue elevator lowered by James after reaching top sky ledge to bring Xinyi up
     {
-      id: 'l11-mp-training',
-      x: 670,
+      id: 'l11-mp-rescue',
+      x: 1180,
       y: 640,
-      width: 120,
+      width: 90,
       height: 22,
-      startX: 670,
+      startX: 1180,
       startY: 640,
-      endX: 810,
-      endY: 640,
-      speed: 1.6,
+      endX: 1180,
+      endY: 350,
+      speed: 2.0,
       direction: 1,
       progress: 0,
       color: '#1e293b',
       topColor: '#38bdf8',
+      isUnlocked: false,
     },
-
-    // Area 3: Platform A (moves to Xinyi when James steps on Red Switch)
+    // Area 5: Twin Elevator Lift A (James / Red route)
     {
-      id: 'l11-mp-canyon-a',
-      x: 1110,
+      id: 'l11-mp-elev-a',
+      x: 2320,
       y: 640,
-      width: 100,
+      width: 90,
       height: 22,
-      startX: 1110,
+      startX: 2320,
       startY: 640,
-      endX: 1210,
-      endY: 640,
-      speed: 1.7,
-      direction: 1,
-      progress: 0,
-      color: '#7c2d12',
-      topColor: '#fb923c',
-    },
-    // Area 3: Platform B (moves for James when Xinyi steps on Blue Switch)
-    {
-      id: 'l11-mp-canyon-b',
-      x: 1320,
-      y: 640,
-      width: 100,
-      height: 22,
-      startX: 1320,
-      startY: 640,
-      endX: 1410,
-      endY: 640,
-      speed: 1.7,
-      direction: 1,
-      progress: 0,
-      color: '#0c4a6e',
-      topColor: '#38bdf8',
-    },
-
-    // Area 4: Rescue Elevator (James rides up after Xinyi steps on Rescue Switch)
-    {
-      id: 'l11-mp-rescue',
-      x: 1875,
-      y: 640,
-      width: 100,
-      height: 22,
-      startX: 1875,
-      startY: 640,
-      endX: 1875,
-      endY: 440,
+      endX: 2320,
+      endY: 420,
       speed: 1.8,
       direction: 1,
       progress: 0,
-      color: '#1e293b',
-      topColor: '#38bdf8',
-    },
-
-    // Area 5: Twin Elevator Lift A (James, Red)
-    {
-      id: 'l11-mp-elev-a',
-      x: 2330,
-      y: 640,
-      width: 100,
-      height: 22,
-      startX: 2330,
-      startY: 640,
-      endX: 2330,
-      endY: 420,
-      speed: 1.7,
-      direction: 1,
-      progress: 0,
       color: '#7c2d12',
       topColor: '#fb923c',
+      isUnlocked: false,
     },
-    // Area 5: Twin Elevator Lift B (Xinyi, Blue)
+    // Area 5: Twin Elevator Lift B (Xinyi / Blue route)
     {
       id: 'l11-mp-elev-b',
-      x: 2560,
+      x: 2550,
       y: 420,
-      width: 100,
+      width: 90,
       height: 22,
-      startX: 2560,
+      startX: 2550,
       startY: 420,
-      endX: 2560,
+      endX: 2550,
       endY: 640,
-      speed: 1.7,
+      speed: 1.8,
       direction: 1,
       progress: 0,
       color: '#0c4a6e',
       topColor: '#38bdf8',
+      isUnlocked: false,
     },
-
-    // Area 7: Giant Sky Transport Platform!
+    // Area 7: Giant Sky Transport Platform
     {
       id: 'l11-final-transport',
-      x: 3460,
+      x: 3440,
       y: 640,
       width: 140,
       height: 24,
-      startX: 3460,
+      startX: 3440,
       startY: 640,
       endX: 3600,
       endY: 640,
@@ -365,31 +377,18 @@ export const LEVEL_11: GameLevel = {
       progress: 0,
       color: '#0f172a',
       topColor: '#fbbf24',
-    },
-  ],
-  talkingTerminals: [
-    // Area 1 Talking Terminal
-    {
-      id: 'l11-terminal-1',
-      x: 360,
-      y: 590,
-      width: 80,
-      height: 50,
-      p1Detected: false,
-      p2Detected: false,
-      isActivated: false,
-      message: 'STAND NEARBY',
+      isUnlocked: false,
     },
   ],
   conveyorBelts: [
-    // Area 6 Sky Factory Conveyor Belt with direction control
+    // Area 6: Heavy opposing wind conveyor (speed -3.2 opposes forward movement unless reversed)
     {
       id: 'conveyor-11',
       x: 2880,
       y: 640,
-      width: 240,
-      height: 40,
-      speed: -2.2, // Default: pushes back to left
+      width: 260,
+      height: 38,
+      speed: -3.2,
       beltDirection: 'LEFT',
       isActive: true,
       color: '#1e293b',
@@ -397,44 +396,89 @@ export const LEVEL_11: GameLevel = {
     },
   ],
   bridges: [
-    // Area 1 Barrier opened by Terminal Activation
+    // Mechanism A: Temporary Bridge across first chasm (260px gap).
+    // Extends only while Xinyi holds the blue pressure plate and James pulls lever. Retracts if Xinyi steps off!
     {
-      id: 'l11-bridge-1',
-      x: 480,
+      id: 'bridge-l11-temp1',
+      x: 240,
       y: 640,
       width: 0,
       height: 18,
-      targetWidth: 40,
+      targetWidth: 260,
       state: 'CLOSED',
       openProgress: 0,
-      requiredSwitchIds: ['btn-l11-term-virtual'],
+      requiredSwitchIds: ['btn-l11-plate-xinyi', 'btn-l11-lever-james'],
+      stayOpen: false,
+      topColor: '#38bdf8',
+    },
+    // Mechanism C: Canyon Synchronized Bridge (260px gap across canyon void)
+    {
+      id: 'bridge-l11-canyon',
+      x: 1780,
+      y: 440,
+      width: 0,
+      height: 18,
+      targetWidth: 260,
+      state: 'CLOSED',
+      openProgress: 0,
+      requiredSwitchIds: ['btn-l11-canyon-red', 'btn-l11-canyon-blue'],
+      stayOpen: true,
+      topColor: '#fbbf24',
+    },
+    // Area 6: Catwalk bridge deployed after Xinyi crosses conveyor, allowing James to run safely
+    {
+      id: 'bridge-l11-conveyor',
+      x: 2880,
+      y: 636,
+      width: 0,
+      height: 18,
+      targetWidth: 260,
+      state: 'CLOSED',
+      openProgress: 0,
+      requiredSwitchIds: ['btn-l11-belt-done'],
       stayOpen: true,
       topColor: '#38bdf8',
     },
   ],
   buttons: [
-    // Area 1 Virtual switch toggled by terminal
+    // Mechanism A: Blue Pressure Plate for Xinyi
     {
-      id: 'btn-l11-term-virtual',
-      playerTarget: 'any',
-      label: 'TERMINAL GATE',
-      x: 380,
-      y: 636,
-      width: 30,
-      height: 8,
+      id: 'btn-l11-plate-xinyi',
+      playerTarget: 'xinyi',
+      label: '💧 PRESSURE PLATE',
+      x: 130,
+      y: 668,
+      width: 64,
+      height: 12,
       isPressed: false,
       pressProgress: 0,
       color: '#0284c7',
       glowColor: '#38bdf8',
       triggerTarget: 'bridge',
-      targetId: 'l11-bridge-1',
+      targetId: 'bridge-l11-temp1',
     },
-    // Area 3: James Red Switch for Canyon Platform A
+    // Mechanism A: James Lever to extend bridge while Xinyi holds plate
     {
-      id: 'btn-l11-canyon-red',
+      id: 'btn-l11-lever-james',
       playerTarget: 'james',
-      label: 'JAMES PLATFORM',
-      x: 1040,
+      label: '🔥 PULL LEVER',
+      x: 170,
+      y: 628,
+      width: 44,
+      height: 12,
+      isPressed: false,
+      pressProgress: 0,
+      color: '#ea580c',
+      glowColor: '#fb923c',
+      triggerTarget: 'bridge',
+      targetId: 'bridge-l11-temp1',
+    },
+    // Mechanism A: Reciprocal Lock Switch on landing platform to lock bridge and summon return for Xinyi
+    {
+      id: 'btn-l11-return-switch',
+      playerTarget: 'james',
+      label: '🔥 LOCK BRIDGE',
+      x: 570,
       y: 628,
       width: 48,
       height: 12,
@@ -442,47 +486,105 @@ export const LEVEL_11: GameLevel = {
       pressProgress: 0,
       color: '#ea580c',
       glowColor: '#fb923c',
-      triggerTarget: 'platform',
-      targetId: 'l11-mp-canyon-a',
     },
-    // Area 3: Xinyi Blue Switch for Canyon Platform B
+
+    // Mechanism B: Xinyi's Booster Unlock Plate
     {
-      id: 'btn-l11-canyon-blue',
+      id: 'btn-l11-booster-unlock',
       playerTarget: 'xinyi',
-      label: 'XINYI PLATFORM',
-      x: 1270,
+      label: '💧 UNLOCK BOOSTER',
+      x: 1090,
+      y: 558,
+      width: 44,
+      height: 12,
+      isPressed: false,
+      pressProgress: 0,
+      color: '#0284c7',
+      glowColor: '#38bdf8',
+    },
+    // Mechanism B: James Fire Ignition Switch
+    {
+      id: 'btn-l11-fire-charge',
+      playerTarget: 'james',
+      label: '🔥 CHARGE IGNITION',
+      x: 1140,
       y: 628,
-      width: 48,
+      width: 44,
       height: 12,
       isPressed: false,
       pressProgress: 0,
-      color: '#0284c7',
-      glowColor: '#38bdf8',
-      triggerTarget: 'platform',
-      targetId: 'l11-mp-canyon-b',
+      color: '#ea580c',
+      glowColor: '#fb923c',
     },
-    // Area 4: Rescue switch (Xinyi triggers to raise elevator for James)
+    // Mechanism B: The Launch Pad that propels players high into the sky!
     {
-      id: 'btn-l11-rescue',
-      playerTarget: 'xinyi',
-      label: 'RESCUE LIFT',
-      x: 1785,
-      y: 428,
+      id: 'btn-l11-launcher-pad',
+      playerTarget: 'any',
+      label: '⚡ LAUNCH PAD',
+      x: 1190,
+      y: 628,
+      width: 44,
+      height: 12,
+      isPressed: false,
+      pressProgress: 0,
+      color: '#f59e0b',
+      glowColor: '#fde047',
+    },
+    // Mechanism B: High Lever on sky ledge to lower elevator for partner
+    {
+      id: 'btn-l11-high-lever',
+      playerTarget: 'any',
+      label: 'DEPLOY ELEVATOR',
+      x: 1380,
+      y: 338,
       width: 48,
       height: 12,
       isPressed: false,
       pressProgress: 0,
-      color: '#0284c7',
-      glowColor: '#38bdf8',
+      color: '#10b981',
+      glowColor: '#34d399',
       triggerTarget: 'platform',
       targetId: 'l11-mp-rescue',
     },
-    // Area 6: Reverse Conveyor Switch (James holds to reverse conveyor for Xinyi)
+
+    // Mechanism C: Canyon Synchronized Switches (James Red Upper / Xinyi Blue Lower)
+    {
+      id: 'btn-l11-canyon-red',
+      playerTarget: 'james',
+      label: '🔥 SYNC SWITCH A',
+      x: 1710,
+      y: 338,
+      width: 44,
+      height: 12,
+      isPressed: false,
+      pressProgress: 0,
+      color: '#ea580c',
+      glowColor: '#fb923c',
+      triggerTarget: 'bridge',
+      targetId: 'bridge-l11-canyon',
+    },
+    {
+      id: 'btn-l11-canyon-blue',
+      playerTarget: 'xinyi',
+      label: '💧 SYNC SWITCH B',
+      x: 1710,
+      y: 548,
+      width: 44,
+      height: 12,
+      isPressed: false,
+      pressProgress: 0,
+      color: '#0284c7',
+      glowColor: '#38bdf8',
+      triggerTarget: 'bridge',
+      targetId: 'bridge-l11-canyon',
+    },
+
+    // Area 6: Reverse Conveyor Switch (James holds to reverse opposing headwind)
     {
       id: 'btn-l11-stop-conveyor',
       playerTarget: 'james',
-      label: 'REVERSE BELT',
-      x: 2810,
+      label: '🔥 REVERSE BELT',
+      x: 2800,
       y: 628,
       width: 48,
       height: 12,
@@ -491,12 +593,12 @@ export const LEVEL_11: GameLevel = {
       color: '#ea580c',
       glowColor: '#fb923c',
     },
-    // Area 6: Conveyor Done Switch (Xinyi steps on other side)
+    // Area 6: Conveyor Catwalk Done Switch (Xinyi presses after crossing)
     {
       id: 'btn-l11-belt-done',
       playerTarget: 'xinyi',
-      label: 'CONVEYOR OFF',
-      x: 3170,
+      label: '💧 SECURE CATWALK',
+      x: 3180,
       y: 628,
       width: 48,
       height: 12,
@@ -504,8 +606,11 @@ export const LEVEL_11: GameLevel = {
       pressProgress: 0,
       color: '#0284c7',
       glowColor: '#38bdf8',
+      triggerTarget: 'bridge',
+      targetId: 'bridge-l11-conveyor',
     },
-    // Area 7: Final Boarding Switches (Both step to launch final transport!)
+
+    // Area 7: Final Boarding Switches
     {
       id: 'btn-l11-final-red',
       playerTarget: 'james',
@@ -559,41 +664,52 @@ export const LEVEL_11: GameLevel = {
   checkpoints: [
     {
       id: 'cp-l11-1',
-      x: 900,
+      x: 940,
       y: 580,
       width: 32,
       height: 60,
-      label: 'CANYON STATION',
+      label: 'CANYON BASE',
       isActive: false,
-      respawnP1: { x: 860, y: 580 },
-      respawnP2: { x: 920, y: 580 },
+      respawnP1: { x: 920, y: 580 },
+      respawnP2: { x: 960, y: 580 },
     },
     {
       id: 'cp-l11-2',
-      x: 2200,
+      x: 1510,
+      y: 380,
+      width: 32,
+      height: 60,
+      label: 'HIGH SKY CLIFF',
+      isActive: false,
+      respawnP1: { x: 1490, y: 380 },
+      respawnP2: { x: 1530, y: 380 },
+    },
+    {
+      id: 'cp-l11-3',
+      x: 2680,
       y: 580,
       width: 32,
       height: 60,
-      label: 'TWIN ELEVATOR',
+      label: 'CONVEYOR DOCK',
       isActive: false,
-      respawnP1: { x: 2180, y: 580 },
-      respawnP2: { x: 2230, y: 580 },
+      respawnP1: { x: 2660, y: 580 },
+      respawnP2: { x: 2700, y: 580 },
     },
   ],
   gems: [
-    // Gem 1: Main route between start islands
-    { id: 'gem-11-1', x: 290, y: 580, width: 22, height: 22, isCollected: false, type: 'general' },
-    // Gem 2: Main route on training platform
-    { id: 'gem-11-2', x: 740, y: 580, width: 22, height: 22, isCollected: false, type: 'general' },
-    // Gem 3: Floating in canyon (Xinyi route)
-    { id: 'gem-11-3', x: 1160, y: 570, width: 22, height: 22, isCollected: false, type: 'blue' },
-    // Gem 4: Under canyon ledge (James route)
-    { id: 'gem-11-4', x: 1370, y: 570, width: 22, height: 22, isCollected: false, type: 'orange' },
-    // Gem 5: High above rescue tower (Xinyi helps James reach it)
-    { id: 'gem-11-5', x: 1880, y: 360, width: 22, height: 22, isCollected: false, type: 'general' },
-    // Gem 6: Floating high between twin elevators (James helps Xinyi)
-    { id: 'gem-11-6', x: 2510, y: 350, width: 22, height: 22, isCollected: false, type: 'general' },
-    // Gem 7: Hidden at secret mast of final transport
-    { id: 'gem-11-7', x: 3460, y: 320, width: 22, height: 22, isCollected: false, type: 'general' },
+    // Gem 1: Floating above Mechanism A temporary bridge
+    { id: 'gem-11-1', x: 370, y: 580, width: 22, height: 22, isCollected: false, type: 'general' },
+    // Gem 2: On elevated parkour ledge in Area 2
+    { id: 'gem-11-2', x: 820, y: 540, width: 22, height: 22, isCollected: false, type: 'general' },
+    // Gem 3: Above booster unlock plate (Xinyi route)
+    { id: 'gem-11-3', x: 1110, y: 510, width: 22, height: 22, isCollected: false, type: 'blue' },
+    // Gem 4: High sky ledge reached via Flame Booster launch
+    { id: 'gem-11-4', x: 1330, y: 290, width: 22, height: 22, isCollected: false, type: 'orange' },
+    // Gem 5: High above James's canyon sync perch
+    { id: 'gem-11-5', x: 1730, y: 290, width: 22, height: 22, isCollected: false, type: 'general' },
+    // Gem 6: Floating between Twin Elevators
+    { id: 'gem-11-6', x: 2480, y: 360, width: 22, height: 22, isCollected: false, type: 'general' },
+    // Gem 7: Hidden at secret observation mast above final transport
+    { id: 'gem-11-7', x: 3460, y: 310, width: 22, height: 22, isCollected: false, type: 'general' },
   ],
 };

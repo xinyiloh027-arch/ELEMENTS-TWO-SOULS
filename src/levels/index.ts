@@ -128,8 +128,8 @@ export const LEVEL_METADATA_LIST: LevelMeta[] = [
     id: 11,
     title: '11 Sky Transport Station',
     name: '天空运输站',
-    desc: '浮空运输平台 · 横渡天际深渊与高低连携',
-    difficulty: '进阶 ⭐⭐',
+    desc: '合作跑酷飞跃 · 压感连携、火焰推进器与双人浮空艇',
+    difficulty: '进阶 ⭐⭐⭐',
     unlocked: false,
   },
   {

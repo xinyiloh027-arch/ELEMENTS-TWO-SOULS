@@ -91,6 +91,9 @@ export class GameEngine {
   private l11RescueWaitTimer: number = 0;
   private l11FinalCountdown: number = 0;
   private l11FinalLaunched: boolean = false;
+  private l11BoosterCharged: boolean = false;
+  private l11SyncTimer: number = 0;
+  private l11ReturnLocked: boolean = false;
   private l12RunTimer: number = 0;
   private l12FinalTimer: number = 0;
   private proximitySparkleCooldown: number = 0;
@@ -169,6 +172,12 @@ export class GameEngine {
     this.gemsCollected = 0;
     this.totalGems = this.level.gems ? this.level.gems.length : 0;
     this.isTimeFrozen = false;
+    this.l11RescueWaitTimer = 0;
+    this.l11FinalCountdown = 0;
+    this.l11FinalLaunched = false;
+    this.l11BoosterCharged = false;
+    this.l11SyncTimer = 0;
+    this.l11ReturnLocked = false;
     this.l15TimedSprintTimer = 0;
     this.l16SwapCooldown = 0;
     this.currentWorld = 'A';
@@ -1127,100 +1136,284 @@ export class GameEngine {
       this.triggerBanter('Together! ✨', 'Together! ✨', undefined, 45);
     }
 
-    // Level 11 Cooperative Logic (Talking Terminal, Rescue Lift, Conveyor Belt, Final Transport)
+    // Level 11 Cooperative Logic (Pressure Plate + Lever, Fire-Powered Booster, Canyon Dual Sync, Conveyor, Final Transport)
     if (this.level.id === 11) {
-      // Area 1: Talking Terminal
-      if (this.level.talkingTerminals) {
-        for (const term of this.level.talkingTerminals) {
-          if (!term.isActivated) {
-            const dJames = Math.hypot(
-              this.players.james.x + 19 - (term.x + term.width / 2),
-              this.players.james.y + 19 - (term.y + term.height / 2)
-            );
-            const dXinyi = Math.hypot(
-              this.players.xinyi.x + 19 - (term.x + term.width / 2),
-              this.players.xinyi.y + 19 - (term.y + term.height / 2)
-            );
-            if (dJames < 90) term.p2Detected = true;
-            if (dXinyi < 90) term.p1Detected = true;
+      const isZh = getCurrentLanguage() === 'zh';
 
-            if (term.p1Detected && term.p2Detected) {
-              term.isActivated = true;
-              term.message = 'TEAMWORK ACTIVATED!';
-              this.triggerBanter('Nice! It worked!', 'Way to go Xinyi!', '✨ TEAMWORK ACTIVATED: PASSAGE UNLOCKED', 90);
-              const virtBtn = this.level.buttons.find((b) => b.id === 'btn-l11-term-virtual');
-              if (virtBtn) virtBtn.isPressed = true;
-            } else if (term.p1Detected) {
-              term.message = '💧 Xinyi detected...';
-            } else if (term.p2Detected) {
-              term.message = '🔥 James detected...';
+      // ---------------- MECHANISM A: PRESSURE PLATE + LEVER (Area 1) ----------------
+      const plateXinyi = this.level.buttons.find((b) => b.id === 'btn-l11-plate-xinyi');
+      const leverJames = this.level.buttons.find((b) => b.id === 'btn-l11-lever-james');
+      const returnSw = this.level.buttons.find((b) => b.id === 'btn-l11-return-switch');
+      const tempBridge = this.level.bridges?.find((b) => b.id === 'bridge-l11-temp1');
+
+      if (returnSw?.isPressed && !this.l11ReturnLocked && tempBridge) {
+        this.l11ReturnLocked = true;
+        tempBridge.isUnlocked = true;
+        tempBridge.stayOpen = true;
+        tempBridge.state = 'OPEN';
+        tempBridge.openProgress = 1;
+        tempBridge.width = tempBridge.targetWidth;
+        this.triggerBanter(
+          isZh ? '桥梁已永久锁定！快过来，Xinyi！' : 'Bridge locked! Come across, Xinyi!',
+          isZh ? '太棒了，我这就来！' : 'Awesome, on my way!',
+          isZh ? '✨ 桥梁已永久锁定：双人安全通行' : '✨ BRIDGE SECURED: SAFE TO CROSS',
+          90
+        );
+      }
+
+      if (tempBridge && !this.l11ReturnLocked) {
+        if (plateXinyi?.isPressed && leverJames?.isPressed) {
+          tempBridge.stayOpen = false;
+          if (this.gameTime % 60 === 0) {
+            this.triggerBanter(
+              isZh ? '快冲过去！我踩着压感板！' : "Sprint across! I'm holding the plate!",
+              isZh ? '收到！全速冲刺！' : 'On it! Full speed!',
+              isZh ? '🔥 临时桥梁展开中：离开踏板将立即回缩！' : '🔥 TEMPORARY BRIDGE EXTENDING: DO NOT STEP OFF!',
+              40
+            );
+          }
+        } else if (plateXinyi?.isPressed && !leverJames?.isPressed) {
+          if (this.gameTime % 90 === 0) {
+            this.triggerBanter(
+              isZh ? '我踩住压感板了！James快拉动机关！' : "I'm holding the plate! James, pull the lever!",
+              undefined,
+              isZh ? '💧 XINYI踩住踏板：JAMES请拉动拉杆！' : '💧 XINYI: HOLDING! JAMES: PULL THE LEVER!',
+              40
+            );
+          }
+        } else if (leverJames?.isPressed && !plateXinyi?.isPressed) {
+          if (this.gameTime % 90 === 0) {
+            this.triggerBanter(
+              undefined,
+              isZh ? '拉杆没通电！Xinyi需要站在下方压感板上！' : 'No power! Xinyi needs to stand on the lower pressure plate!',
+              isZh ? '⚠️ 缺少压感激活：需要XINYI站上下方蓝色踏板！' : '⚠️ UNPOWERED: XINYI MUST STAND ON BLUE PRESSURE PLATE!',
+              40
+            );
+          }
+        }
+      }
+
+      // ---------------- MECHANISM B: FIRE-POWERED JUMP LAUNCHER (Area 3) ----------------
+      const unlockBtn = this.level.buttons.find((b) => b.id === 'btn-l11-booster-unlock');
+      const chargeBtn = this.level.buttons.find((b) => b.id === 'btn-l11-fire-charge');
+      const launchPad = this.level.buttons.find((b) => b.id === 'btn-l11-launcher-pad');
+      const highLever = this.level.buttons.find((b) => b.id === 'btn-l11-high-lever');
+      const rescueElev = this.level.movingPlatforms?.find((m) => m.id === 'l11-mp-rescue');
+
+      // Check if booster charging conditions are met
+      if (unlockBtn?.isPressed && chargeBtn?.isPressed) {
+        if (!this.l11BoosterCharged) {
+          this.l11BoosterCharged = true;
+          this.triggerBanter(
+            isZh ? '火焰推进器充能完毕！' : 'Flame Booster fully charged!',
+            isZh ? '踩上跳板准备起飞！' : 'Step on the pad and launch!',
+            isZh ? '⚡ 推进器已充能：踩上跳板高跃飞跃峭壁！' : '⚡ BOOSTER CHARGED: STEP ON PAD TO SOAR!',
+            90
+          );
+        }
+      }
+
+      // If charged, spawn continuous magical swirling embers around the launch pad
+      if (this.l11BoosterCharged && launchPad) {
+        launchPad.color = '#f59e0b';
+        launchPad.glowColor = '#fde047';
+        if (Math.random() < 0.4) {
+          this.spawnParticle(
+            launchPad.x + Math.random() * launchPad.width,
+            launchPad.y + 2,
+            (Math.random() - 0.5) * 1.5,
+            -2.5 - Math.random() * 2.0,
+            Math.random() < 0.5 ? '#f59e0b' : '#fb923c',
+            4,
+            24,
+            'star'
+          );
+        }
+      }
+
+      // Check player interaction with the launch pad
+      if (launchPad) {
+        for (const playerKey of ['james', 'xinyi'] as const) {
+          const p = this.players[playerKey];
+          const onPad = checkAABB(
+            p.x + 4,
+            p.y + p.height - 8,
+            p.width - 8,
+            12,
+            launchPad.x,
+            launchPad.y,
+            launchPad.width,
+            launchPad.height + 4
+          );
+
+          if (onPad) {
+            if (this.l11BoosterCharged) {
+              if (p.vy > -10) {
+                p.vy = -18.2;
+                p.isGrounded = false;
+                soundManager.playJump(playerKey);
+                soundManager.playInteract('lever');
+                for (let i = 0; i < 16; i++) {
+                  this.spawnParticle(
+                    p.x + p.width / 2,
+                    p.y + p.height,
+                    (Math.random() - 0.5) * 6,
+                    -4 - Math.random() * 6,
+                    Math.random() < 0.5 ? '#f59e0b' : '#ea580c',
+                    5,
+                    30,
+                    'star'
+                  );
+                }
+                this.triggerBanter(
+                  isZh ? '芜湖！飞上来了！' : 'Whoa! Flying high!',
+                  isZh ? '太壮观了！' : 'Incredible launch!',
+                  isZh ? '🚀 强力推进：飞跃绝壁！' : '🚀 SUPER LAUNCH: REACHED THE SKY LEDGE!',
+                  60
+                );
+              }
+            } else if (this.gameTime % 90 === 0) {
+              this.triggerBanter(
+                undefined,
+                undefined,
+                isZh
+                  ? '⚠️ 推进器未就绪：XINYI踩住解锁踏板 & JAMES操作点火充能！'
+                  : '⚠️ BOOSTER OFFLINE: XINYI UNLOCK & JAMES CHARGE IGNITION!',
+                40
+              );
             }
           }
         }
       }
 
-      // Area 4: Rescue elevator wait banter
-      const rescueBtn = this.level.buttons.find((b) => b.id === 'btn-l11-rescue');
-      const rescueElev = this.level.movingPlatforms?.find((m) => m.id === 'l11-mp-rescue');
-      if (rescueBtn?.isPressed && rescueElev) {
+      // High sky lever on upper cliff to lower elevator for the partner
+      if (highLever?.isPressed && rescueElev && !rescueElev.isUnlocked) {
         rescueElev.isUnlocked = true;
-        if (this.players.james.y > 540) {
-          this.l11RescueWaitTimer++;
-          if (this.l11RescueWaitTimer === 120) {
-            const isZh = getCurrentLanguage() === 'zh';
+        this.triggerBanter(
+          isZh ? '我把升降梯放下去了！快上来！' : 'Lowered the elevator! Hop on!',
+          isZh ? '马上就来！' : 'Right behind you!',
+          isZh ? '🚠 升降梯已启动：接送队友登顶' : '🚠 RESCUE ELEVATOR DEPLOYED!',
+          80
+        );
+      }
+
+      // ---------------- MECHANISM C: CANYON DUAL SYNCHRONIZED SWITCHES (Area 4 & 5) ----------------
+      const redSync = this.level.buttons.find((b) => b.id === 'btn-l11-canyon-red');
+      const blueSync = this.level.buttons.find((b) => b.id === 'btn-l11-canyon-blue');
+      const canyonBridge = this.level.bridges?.find((b) => b.id === 'bridge-l11-canyon');
+      const twinElevA = this.level.movingPlatforms?.find((m) => m.id === 'l11-mp-elev-a');
+      const twinElevB = this.level.movingPlatforms?.find((m) => m.id === 'l11-mp-elev-b');
+
+      if (canyonBridge && canyonBridge.state !== 'OPEN') {
+        if (redSync?.isPressed && blueSync?.isPressed) {
+          canyonBridge.state = 'OPEN';
+          canyonBridge.openProgress = 1;
+          canyonBridge.width = canyonBridge.targetWidth;
+          canyonBridge.stayOpen = true;
+          canyonBridge.isUnlocked = true;
+          if (twinElevA) twinElevA.isUnlocked = true;
+          if (twinElevB) twinElevB.isUnlocked = true;
+          this.triggerBanter(
+            isZh ? '双人完美同步！' : 'Synchronized perfectly!',
+            isZh ? '峡谷天桥已展开！' : 'Canyon skyway opened!',
+            isZh ? '⚡ 双人同步成功：峡谷巨桥展开 & 升降梯就绪！' : '⚡ PERFECT SYNC: CANYON BRIDGE EXTENDED & LIFTS READY!',
+            90
+          );
+        } else if (redSync?.isPressed || blueSync?.isPressed) {
+          if (this.l11SyncTimer <= 0) {
+            this.l11SyncTimer = 180; // 3 seconds grace period
             this.triggerBanter(
-              isZh ? 'James！你还不上来吗？' : "James! Aren't you coming up?",
-              isZh ? '等等等等！' : 'Wait wait wait!',
-              undefined,
-              80
+              isZh ? '我踩到开关了！' : 'Stepped on my switch!',
+              isZh ? '快踩你的！' : 'Get to yours quick!',
+              isZh ? '⚡ 开关1已就绪 — 请在3.0秒内踩下开关2！' : '⚡ SWITCH 1 READY — 3.0s TO HIT SWITCH 2!',
+              40
             );
+          } else {
+            this.l11SyncTimer--;
+            const remSec = (this.l11SyncTimer / 60).toFixed(1);
+            if (redSync) redSync.countdownTimer = Math.round((this.l11SyncTimer / 60) * 1000);
+            if (blueSync) blueSync.countdownTimer = Math.round((this.l11SyncTimer / 60) * 1000);
+            if (this.l11SyncTimer === 0) {
+              this.triggerBanter(
+                undefined,
+                undefined,
+                isZh ? '⚠️ 同步超时：请两人配合同时踩下！' : '⚠️ SYNC TIMEOUT: COORDINATE AND STEP TOGETHER!',
+                50
+              );
+            }
           }
-        } else if (this.players.james.y <= 460 && this.l11RescueWaitTimer > 60) {
-          this.triggerBanter('Finally!', 'Thanks Xinyi!', undefined, 60);
-          this.l11RescueWaitTimer = 0;
+        } else {
+          this.l11SyncTimer = 0;
         }
       }
 
-      // Area 6: Conveyor belt switches & direction control
+      // ---------------- AREA 6: THE HEAVY REVERSE CONVEYOR ----------------
       const stopConveyorBtn = this.level.buttons.find((b) => b.id === 'btn-l11-stop-conveyor');
       const beltDoneBtn = this.level.buttons.find((b) => b.id === 'btn-l11-belt-done');
       const conveyor = this.level.conveyorBelts?.find((c) => c.id === 'conveyor-11');
+      const conveyorBridge = this.level.bridges?.find((b) => b.id === 'bridge-l11-conveyor');
+
       if (conveyor) {
         if (beltDoneBtn?.isPressed) {
-          // Xinyi reached destination switch: fully halts the conveyor belt
+          // Xinyi reached destination switch: halts belt & extends catwalk
           conveyor.isActive = false;
+          if (conveyorBridge && conveyorBridge.state !== 'OPEN') {
+            conveyorBridge.isUnlocked = true;
+            conveyorBridge.stayOpen = true;
+            conveyorBridge.state = 'OPEN';
+            conveyorBridge.openProgress = 1;
+            conveyorBridge.width = conveyorBridge.targetWidth;
+            this.triggerBanter(
+              isZh ? '我到了！安全步道已铺开！' : 'Made it! Catwalk deployed!',
+              isZh ? '太棒了，我这就冲过去！' : 'Awesome, sprinting across!',
+              isZh ? '✨ 传送带锁定：安全步道已铺开！' : '✨ CONVEYOR HALTED: CATWALK SECURED!',
+              80
+            );
+          }
         } else if (stopConveyorBtn?.isPressed) {
-          // James holds switch: reverses belt direction to RIGHT to carry Xinyi across!
+          // James holds switch: reverses belt direction to RIGHT (3.5 px/f) to carry Xinyi across
           conveyor.isActive = true;
           conveyor.beltDirection = 'RIGHT';
-          conveyor.speed = Math.abs(conveyor.speed || 2.0);
+          conveyor.speed = 3.5;
+          if (this.gameTime % 70 === 0) {
+            this.triggerBanter(
+              isZh ? '逆风已逆转！快乘风过去！' : 'Headwind reversed! Ride the current!',
+              isZh ? '我乘着强流冲过去！' : 'Riding the stream across!',
+              isZh ? '🔥 强风逆转中：顺流全速冲刺！' : '🔥 CURRENT REVERSED: RIDE ACROSS!',
+              35
+            );
+          }
         } else {
-          // Default: conveyor pushes LEFT (opposing progress)
+          // Default: conveyor pushes strongly LEFT (-3.2 px/f) into abyss
           conveyor.isActive = true;
           conveyor.beltDirection = 'LEFT';
-          conveyor.speed = -Math.abs(conveyor.speed || 2.0);
+          conveyor.speed = -3.2;
         }
       }
 
-      // Area 7: Final Giant Transport
+      // ---------------- AREA 7: FINAL GIANT TRANSPORT ----------------
       const redFinal = this.level.buttons.find((b) => b.id === 'btn-l11-final-red');
       const blueFinal = this.level.buttons.find((b) => b.id === 'btn-l11-final-blue');
       const finalTransport = this.level.movingPlatforms?.find((m) => m.id === 'l11-final-transport');
       if (redFinal?.isPressed && blueFinal?.isPressed && finalTransport && !this.l11FinalLaunched) {
         this.l11FinalCountdown++;
         const sec = Math.max(1, 5 - Math.floor(this.l11FinalCountdown / 60));
-        const isZh = getCurrentLanguage() === 'zh';
         this.triggerBanter(
           isZh ? '快上来！' : 'Hop on quick!',
           isZh ? '我站好了！' : "I'm in position!",
-          `🚠 TRANSPORT DEPARTING IN ${sec}...`,
+          isZh ? `🚠 浮空运输艇 ${sec} 秒后启航...` : `🚠 TRANSPORT DEPARTING IN ${sec}...`,
           30,
           sec
         );
         if (this.l11FinalCountdown >= 300) {
           this.l11FinalLaunched = true;
           finalTransport.isUnlocked = true;
-          this.triggerBanter('Off we go!', 'Smooth sailing!', '🚠 EN ROUTE TO SKY DOCK!', 120);
+          this.triggerBanter(
+            isZh ? '起飞！！' : 'Off we go!!',
+            isZh ? '稳稳登顶！' : 'Smooth sailing!',
+            isZh ? '🚠 飞跃云海 · 抵达天空码头！' : '🚠 EN ROUTE TO SKY DOCK!',
+            120
+          );
         }
       }
       if (finalTransport && finalTransport.progress >= 0.95) {
